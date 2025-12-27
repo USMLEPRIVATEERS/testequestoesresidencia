@@ -269,9 +269,9 @@ async function salvarPerfilInicial(event) {
 
         Utils.showNotification('Perfil completado! Redirecionando...', 'success');
 
-        // Fechar modal e redirecionar para planos
+        // Fechar modal e redirecionar para dashboard
         setTimeout(() => {
-            window.location.href = 'index.html?new_user=true';
+            window.location.href = 'dashboard.html';
         }, 1000);
 
     } catch (error) {

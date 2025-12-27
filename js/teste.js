@@ -141,7 +141,7 @@ function renderizarListaQuestoes() {
         li.className = 'question-item';
 
         // Adicionar classe se foi respondida
-        const resposta = respostasUsuario[questao.id];
+        const resposta = respostasUsuario[questao.questao_id];
         if (resposta) {
             if (resposta.status === 'C') {
                 li.classList.add('correct');
@@ -191,7 +191,7 @@ function renderizarQuestao() {
     if (questao.tipo_questao === 'multipla_escolha' && questao.alternativas) {
         // Supabase retorna JSONB já como objeto, não precisa JSON.parse
         const alternativas = questao.alternativas;
-        const respostaSalva = respostasUsuario[questao.id]?.resposta;
+        const respostaSalva = respostasUsuario[questao.questao_id]?.resposta;
 
         alternativas.forEach(alt => {
             const div = document.createElement('div');
@@ -236,7 +236,7 @@ function renderizarQuestao() {
     document.getElementById('comentariosContainer').classList.add('hide');
 
     // Se já foi respondida em modo aprendizado, mostrar gabarito
-    if (testeData.modo === 'aprendizado' && respostasUsuario[questao.id]) {
+    if (testeData.modo === 'aprendizado' && respostasUsuario[questao.questao_id]) {
         verResposta();
     }
 
@@ -310,11 +310,11 @@ function selecionarAlternativa(letra) {
     // Salvar resposta localmente (não envia ainda)
     const questao = testeData.questoes[questaoAtualIndex];
 
-    if (!respostasUsuario[questao.id]) {
-        respostasUsuario[questao.id] = {};
+    if (!respostasUsuario[questao.questao_id]) {
+        respostasUsuario[questao.questao_id] = {};
     }
 
-    respostasUsuario[questao.id].resposta = letra;
+    respostasUsuario[questao.questao_id].resposta = letra;
 }
 
 // Ver resposta (modo aprendizado)
@@ -326,18 +326,18 @@ async function verResposta() {
     console.log('🔴 [DEBUG] Ver Resposta - ID da questão:', questao?.id);
     console.log('🔴 [DEBUG] Ver Resposta - questaoAtualIndex:', questaoAtualIndex);
 
-    const respostaUsuarioAtual = respostasUsuario[questao.id]?.resposta;
+    const respostaUsuarioAtual = respostasUsuario[questao.questao_id]?.resposta;
 
     if (!respostaUsuarioAtual) {
         Utils.showNotification('Selecione uma alternativa primeiro', 'warning');
         return;
     }
 
-    console.log('🔴 [DEBUG] Vai salvar resposta com questao.id:', questao.id);
+    console.log('🔴 [DEBUG] Vai salvar resposta com questao.questao_id:', questao.questao_id);
 
     // Salvar resposta no banco se ainda não foi salva
-    if (!respostasUsuario[questao.id].status) {
-        await salvarResposta(questao.id, respostaUsuarioAtual);
+    if (!respostasUsuario[questao.questao_id].status) {
+        await salvarResposta(questao.questao_id, respostaUsuarioAtual);
     }
 
     respostaVisivel = true;
@@ -382,7 +382,7 @@ async function verResposta() {
     }
 
     // Carregar e mostrar comentários
-    await carregarComentarios(questao.id);
+    await carregarComentarios(questao.questao_id);
 
     // Atualizar lista de questões
     renderizarListaQuestoes();
@@ -610,13 +610,13 @@ async function finalizarTeste() {
         console.log('🟢 [DEBUG] Salvando respostas pendentes no modo simulado...');
         let respostasSalvas = 0;
         for (const questao of testeData.questoes) {
-            const temResposta = respostasUsuario[questao.id]?.resposta;
-            const jaTemStatus = respostasUsuario[questao.id]?.status;
-            console.log(`🟢 [DEBUG] Questão ${questao.id}: resposta=${temResposta}, status=${jaTemStatus}`);
+            const temResposta = respostasUsuario[questao.questao_id]?.resposta;
+            const jaTemStatus = respostasUsuario[questao.questao_id]?.status;
+            console.log(`🟢 [DEBUG] Questão ${questao.questao_id}: resposta=${temResposta}, status=${jaTemStatus}`);
 
             if (temResposta && !jaTemStatus) {
-                console.log('🟢 [DEBUG] Salvando resposta pendente para questão:', questao.id);
-                await salvarResposta(questao.id, respostasUsuario[questao.id].resposta);
+                console.log('🟢 [DEBUG] Salvando resposta pendente para questão:', questao.questao_id);
+                await salvarResposta(questao.questao_id, respostasUsuario[questao.questao_id].resposta);
                 respostasSalvas++;
             }
         }

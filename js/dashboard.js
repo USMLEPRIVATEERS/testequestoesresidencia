@@ -308,10 +308,24 @@ function fecharModalEditarPerfil() {
 // Atualizar campos de WhatsApp no modal de edição
 function updateEditWhatsappFields() {
     const select = document.getElementById('editWhatsappCountryCode');
-    const option = select.options[select.selectedIndex];
-    const dddLength = option.getAttribute('data-ddd-length');
+    if (!select || !select.options || select.selectedIndex === -1) {
+        console.warn('⚠️ [EDIT] Select de WhatsApp não encontrado ou sem opções');
+        return;
+    }
 
+    const option = select.options[select.selectedIndex];
+    if (!option) {
+        console.warn('⚠️ [EDIT] Opção selecionada não encontrada');
+        return;
+    }
+
+    const dddLength = option.getAttribute('data-ddd-length');
     const dddInput = document.getElementById('editWhatsappDDD');
+
+    if (!dddInput) {
+        console.warn('⚠️ [EDIT] Input de DDD não encontrado');
+        return;
+    }
 
     if (dddLength === '0') {
         // Países sem DDD
