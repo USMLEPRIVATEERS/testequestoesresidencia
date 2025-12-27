@@ -99,6 +99,26 @@ Adiciona suporte a imagens nas questões. Execute apenas se você criou o banco 
 ```
 **Recomendado!** Atualiza a função para nunca mostrar questões já respondidas. Garante que você sempre faça questões novas em "Novo Teste".
 
+### 9. Sistema de Assinaturas e Planos (OBRIGATÓRIO)
+```sql
+10-add-subscription-system.sql
+```
+**Obrigatório!** Adiciona o sistema completo de planos e assinaturas:
+- **Plano FREE**: 10 questões por dia (padrão para novos usuários)
+- **Plano MENSAL**: Questões ilimitadas - R$ 60/mês
+- **Plano SEMESTRAL**: Questões ilimitadas - R$ 300/6 meses
+- **Plano ANUAL**: Questões ilimitadas - R$ 500/12 meses
+
+**O que este script faz:**
+- Adiciona colunas de plano na tabela `usuarios`
+- Cria tabela `historico_assinaturas` para controle de pagamentos
+- Cria funções automáticas de reset diário do contador (plano FREE)
+- Cria triggers para incrementar contador ao responder questões
+- Cria funções auxiliares: `pode_responder_questao()` e `obter_info_plano()`
+- Configura RLS para histórico de assinaturas
+
+**Importante:** Todos os usuários novos começam automaticamente no plano FREE!
+
 ---
 
 ## 🔍 Explicação do Problema

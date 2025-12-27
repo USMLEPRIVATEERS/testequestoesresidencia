@@ -18,9 +18,29 @@ let totalQuestoesDisponiveis = 0;
 // Inicializar página
 window.addEventListener('DOMContentLoaded', async () => {
     await Utils.requireAuth();
+    await carregarInfoPlano();
     await carregarOpcoesDosFiltros();
     await atualizarFiltros();
 });
+
+// Carregar e exibir informações do plano
+async function carregarInfoPlano() {
+    const plano = await PlanoManager.carregarPlano();
+    if (plano) {
+        const infoTexto = PlanoManager.formatarInfoPlano(plano);
+        document.getElementById('infoPlano').textContent = infoTexto;
+
+        // Se for plano free com poucas questões restantes, destacar
+        if (plano.tipo === 'free') {
+            const restantes = plano.config.limite_diario - plano.questoesHoje;
+            if (restantes <= 3) {
+                document.getElementById('infoPlano').style.color = 'var(--error-color)';
+                document.getElementById('infoPlano').innerHTML =
+                    `⚠️ ${infoTexto} - <a href="planos.html" style="text-decoration: underline;">Fazer upgrade</a>`;
+            }
+        }
+    }
+}
 
 // Carregar opções dos filtros a partir do banco
 async function carregarOpcoesDosFiltros() {
@@ -276,6 +296,26 @@ async function iniciarTeste() {
             Utils.showNotification(`Máximo de ${CONFIG.MAX_QUESTOES_POR_TESTE} questões por teste`, 'warning');
             return;
         }
+
+        // ====== VERIFICAR LIMITE DO PLANO ======
+        const verificacaoPlano = await PlanoManager.podeResponderQuestoes(quantidade);
+
+        if (!verificacaoPlano.pode) {
+            if (verificacaoPlano.acao === 'upgrade') {
+                PlanoManager.mostrarModalUpgrade(
+                    verificacaoPlano.motivo,
+                    verificacaoPlano.questoesDisponiveis || 0
+                );
+            } else if (verificacaoPlano.acao === 'renovar') {
+                if (confirm(`${verificacaoPlano.motivo}\n\nDeseja renovar seu plano?`)) {
+                    window.location.href = 'planos.html';
+                }
+            } else {
+                Utils.showNotification(verificacaoPlano.motivo, 'warning');
+            }
+            return;
+        }
+        // =======================================
 
         // Mostrar loading
         const btnIniciar = document.getElementById('btnIniciarTeste');
