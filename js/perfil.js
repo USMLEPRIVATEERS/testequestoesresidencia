@@ -10,7 +10,7 @@ let currentPeriod = 30; // Dias
 window.addEventListener('DOMContentLoaded', async () => {
     const session = await Utils.checkAuth();
     if (!session) {
-        window.location.href = 'index.html';
+        window.location.href = 'login.html';
         return;
     }
 

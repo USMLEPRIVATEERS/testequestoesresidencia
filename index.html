@@ -3,227 +3,451 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Questões Residência - Login</title>
+    <title>Planos - Questões Residência</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Estilos específicos da página de planos */
+        .hero {
+            text-align: center;
+            padding: 80px 20px 60px;
+            background: linear-gradient(135deg, var(--gray-900) 0%, var(--black) 100%);
+            color: var(--white);
+            border-radius: var(--radius-xl);
+            margin-bottom: 60px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+
+        .hero p {
+            font-size: 20px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin-bottom: 60px;
+        }
+
+        .plan-card {
+            background: var(--white);
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--black);
+        }
+
+        .plan-card.featured {
+            border-color: var(--black);
+            border-width: 3px;
+            background: var(--gray-50);
+        }
+
+        .plan-card.featured::before {
+            content: 'MAIS POPULAR';
+            position: absolute;
+            top: 20px;
+            right: -35px;
+            background: var(--black);
+            color: var(--white);
+            padding: 6px 40px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transform: rotate(45deg);
+        }
+
+        .plan-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--black);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .plan-price {
+            font-size: 56px;
+            font-weight: 800;
+            color: var(--black);
+            margin-bottom: 8px;
+            letter-spacing: -2px;
+        }
+
+        .plan-price small {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .plan-period {
+            color: var(--gray-600);
+            font-size: 16px;
+            margin-bottom: 32px;
+            font-weight: 600;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+
+        .plan-features li {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-200);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+
+        .plan-features li::before {
+            content: '✓';
+            font-weight: 800;
+            font-size: 20px;
+            color: var(--black);
+            flex-shrink: 0;
+        }
+
+        .plan-cta {
+            width: 100%;
+        }
+
+        .plan-card.free .plan-price {
+            color: var(--gray-700);
+        }
+
+        .faq-section {
+            margin-top: 80px;
+            padding: 60px 40px;
+            background: var(--gray-50);
+            border-radius: var(--radius-xl);
+        }
+
+        .faq-section h2 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 40px;
+        }
+
+        .faq-item {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .faq-question {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--black);
+        }
+
+        .faq-answer {
+            color: var(--gray-700);
+            line-height: 1.7;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .plan-price {
+                font-size: 42px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-box">
-            <h1 class="login-title">QUESTÕES RESIDÊNCIA</h1>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">📚 Questões Residência</div>
+            <!-- Navegação quando NÃO logado -->
+            <nav class="nav" id="navPublic" style="display: none;">
+                <a href="index.html" class="nav-link active">Planos</a>
+                <a href="login.html" class="btn" style="margin-left: 10px; padding: 8px 20px;">Login</a>
+                <a href="login.html#registro" class="btn btn-primary" style="padding: 8px 20px;">Cadastrar</a>
+            </nav>
+            <!-- Navegação quando logado -->
+            <nav class="nav" id="navLogado" style="display: none;">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="criar-teste.html" class="nav-link">Novo Teste</a>
+                <a href="testes-anteriores.html" class="nav-link">Testes Anteriores</a>
+                <a href="ranking.html" class="nav-link">Ranking</a>
+                <a href="index.html" class="nav-link active">Planos</a>
+                <a href="premios.html" class="nav-link">Prêmios</a>
+                <a href="#" class="nav-link" onclick="logout()">Sair</a>
+            </nav>
+        </div>
+    </header>
 
-            <!-- Formulário de Login -->
-            <div id="loginForm" class="form-container">
-                <h2 class="mb-20">Login</h2>
-                <form onsubmit="handleLogin(event)">
-                    <div class="form-group">
-                        <label class="form-label" for="loginEmail">Email</label>
-                        <input
-                            type="email"
-                            id="loginEmail"
-                            class="form-input"
-                            required
-                            placeholder="seu@email.com"
-                        >
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="loginPassword">Senha</label>
-                        <input
-                            type="password"
-                            id="loginPassword"
-                            class="form-input"
-                            required
-                            placeholder="********"
-                        >
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Entrar</button>
-                    <div class="login-toggle">
-                        <a onclick="mostrarResetSenha()" style="font-size: 14px; display: block; margin-bottom: 10px;">Esqueceu sua senha?</a>
-                        Não tem conta?
-                        <a onclick="toggleForms()">Registre-se aqui</a>
-                    </div>
-                </form>
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>Escolha Seu Plano</h1>
+            <p>Prepare-se para a residência médica com milhares de questões comentadas. Comece grátis ou escolha um plano que se encaixa nas suas necessidades.</p>
+        </div>
+
+        <!-- Planos -->
+        <div class="plans-grid">
+            <!-- Plano FREE -->
+            <div class="plan-card free">
+                <div class="plan-name">Free</div>
+                <div class="plan-price">R$ 0<small>/mês</small></div>
+                <div class="plan-period">Sempre grátis</div>
+                <ul class="plan-features">
+                    <li>10 questões por dia</li>
+                    <li>Questões comentadas</li>
+                    <li>Modo aprendizado</li>
+                    <li>Modo simulado</li>
+                    <li>Estatísticas básicas</li>
+                </ul>
+                <button class="btn plan-cta" onclick="selecionarPlano('free')">
+                    Começar Grátis
+                </button>
             </div>
 
-            <!-- Formulário de Registro -->
-            <div id="registerForm" class="form-container hide">
-                <h2 class="mb-20">Criar Conta</h2>
-                <form onsubmit="handleRegister(event)">
-                    <div class="form-group">
-                        <label class="form-label" for="registerName">Nome Completo</label>
-                        <input
-                            type="text"
-                            id="registerName"
-                            class="form-input"
-                            required
-                            placeholder="Seu nome completo"
-                        >
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="registerEmail">Email</label>
-                        <input
-                            type="email"
-                            id="registerEmail"
-                            class="form-input"
-                            required
-                            placeholder="seu@email.com"
-                        >
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="registerWhatsapp">WhatsApp</label>
-                        <div style="display: flex; gap: 10px;">
-                            <select id="whatsappCountryCode" class="form-select" style="flex: 0 0 120px;" onchange="updateWhatsappFields()">
-                                <option value="+55" data-ddd-length="2" data-phone-length="9">🇧🇷 +55</option>
-                                <option value="+1" data-ddd-length="3" data-phone-length="7">🇺🇸 +1</option>
-                                <option value="+44" data-ddd-length="2" data-phone-length="10">🇬🇧 +44</option>
-                                <option value="+351" data-ddd-length="0" data-phone-length="9">🇵🇹 +351</option>
-                                <option value="+34" data-ddd-length="0" data-phone-length="9">🇪🇸 +34</option>
-                                <option value="+49" data-ddd-length="0" data-phone-length="11">🇩🇪 +49</option>
-                                <option value="+33" data-ddd-length="1" data-phone-length="9">🇫🇷 +33</option>
-                                <option value="+39" data-ddd-length="0" data-phone-length="10">🇮🇹 +39</option>
-                                <option value="+54" data-ddd-length="2" data-phone-length="8">🇦🇷 +54</option>
-                                <option value="+56" data-ddd-length="1" data-phone-length="8">🇨🇱 +56</option>
-                                <option value="+52" data-ddd-length="2" data-phone-length="8">🇲🇽 +52</option>
-                            </select>
-                            <input
-                                type="tel"
-                                id="whatsappDDD"
-                                class="form-input"
-                                placeholder="DDD"
-                                maxlength="2"
-                                style="flex: 0 0 80px;"
-                                required
-                                pattern="[0-9]{2}"
-                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                            >
-                            <input
-                                type="tel"
-                                id="whatsappNumber"
-                                class="form-input"
-                                placeholder="Número"
-                                maxlength="9"
-                                style="flex: 1;"
-                                required
-                                pattern="[0-9]{8,9}"
-                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                            >
-                        </div>
-                        <small style="color: var(--text-muted); font-size: 12px; margin-top: 5px; display: block;">
-                            <span id="whatsappExample">Exemplo: DDD: 11, Número: 999999999</span>
-                        </small>
-                    </div>
-                    <script>
-                        function updateWhatsappFields() {
-                            const select = document.getElementById('whatsappCountryCode');
-                            const option = select.options[select.selectedIndex];
-                            const dddLength = option.getAttribute('data-ddd-length');
-                            const phoneLength = option.getAttribute('data-phone-length');
+            <!-- Plano ANUAL (Featured) -->
+            <div class="plan-card featured">
+                <div class="plan-name">Anual</div>
+                <div class="plan-price">R$ 500<small>/ano</small></div>
+                <div class="plan-period">Economize R$ 220 (31% off)</div>
+                <ul class="plan-features">
+                    <li>Questões ilimitadas</li>
+                    <li>Todas as funcionalidades FREE</li>
+                    <li>Filtros avançados</li>
+                    <li>Estatísticas detalhadas</li>
+                    <li>Ranking completo</li>
+                    <li>Sem anúncios</li>
+                    <li><strong>12 meses de acesso total</strong></li>
+                    <li><strong>Melhor custo-benefício</strong></li>
+                </ul>
+                <button class="btn btn-primary plan-cta" onclick="mostrarPagamentoEmBreve('anual')">
+                    Assinar Anual
+                </button>
+            </div>
 
-                            const dddInput = document.getElementById('whatsappDDD');
-                            const phoneInput = document.getElementById('whatsappNumber');
-                            const example = document.getElementById('whatsappExample');
+            <!-- Plano SEMESTRAL -->
+            <div class="plan-card">
+                <div class="plan-name">Semestral</div>
+                <div class="plan-price">R$ 300<small>/6 meses</small></div>
+                <div class="plan-period">Economize R$ 60 (14% off)</div>
+                <ul class="plan-features">
+                    <li>Questões ilimitadas</li>
+                    <li>Todas as funcionalidades FREE</li>
+                    <li>Filtros avançados</li>
+                    <li>Estatísticas detalhadas</li>
+                    <li>Ranking completo</li>
+                    <li>Sem anúncios</li>
+                    <li><strong>6 meses de acesso total</strong></li>
+                </ul>
+                <button class="btn btn-primary plan-cta" onclick="mostrarPagamentoEmBreve('semestral')">
+                    Assinar Semestral
+                </button>
+            </div>
 
-                            if (dddLength === '0') {
-                                // Países sem DDD (ex: Portugal)
-                                dddInput.style.display = 'none';
-                                dddInput.required = false;
-                                dddInput.value = '';
-                                phoneInput.maxLength = phoneLength;
-                                phoneInput.pattern = `[0-9]{${phoneLength}}`;
-                                phoneInput.placeholder = 'Número completo';
-                                example.textContent = `Exemplo: Número com ${phoneLength} dígitos`;
-                            } else {
-                                // Países com DDD
-                                dddInput.style.display = 'block';
-                                dddInput.required = true;
-                                dddInput.maxLength = dddLength;
-                                dddInput.pattern = `[0-9]{${dddLength}}`;
-                                phoneInput.maxLength = phoneLength;
-                                phoneInput.pattern = `[0-9]{${phoneLength}}`;
-                                phoneInput.placeholder = 'Número';
+            <!-- Plano MENSAL -->
+            <div class="plan-card">
+                <div class="plan-name">Mensal</div>
+                <div class="plan-price">R$ 60<small>/mês</small></div>
+                <div class="plan-period">Pago mensalmente</div>
+                <ul class="plan-features">
+                    <li>Questões ilimitadas</li>
+                    <li>Todas as funcionalidades FREE</li>
+                    <li>Filtros avançados</li>
+                    <li>Estatísticas detalhadas</li>
+                    <li>Ranking completo</li>
+                    <li>Sem anúncios</li>
+                </ul>
+                <button class="btn btn-primary plan-cta" onclick="mostrarPagamentoEmBreve('mensal')">
+                    Assinar Mensal
+                </button>
+            </div>
+        </div>
 
-                                if (select.value === '+55') {
-                                    example.textContent = 'Exemplo: DDD: 11, Número: 999999999';
-                                } else if (select.value === '+1') {
-                                    example.textContent = 'Exemplo: DDD: 212, Número: 5551234';
-                                } else {
-                                    example.textContent = `Exemplo: DDD com ${dddLength} dígitos, Número com ${phoneLength} dígitos`;
-                                }
-                            }
-                        }
+        <!-- FAQ Section -->
+        <div class="faq-section">
+            <h2>Perguntas Frequentes</h2>
 
-                        // Inicializar campos ao carregar
-                        if (document.getElementById('whatsappCountryCode')) {
-                            updateWhatsappFields();
-                        }
-                    </script>
-                    <div class="form-group">
-                        <label class="form-label" for="registerPassword">Senha</label>
-                        <input
-                            type="password"
-                            id="registerPassword"
-                            class="form-input"
-                            required
-                            minlength="6"
-                            placeholder="Mínimo 6 caracteres"
-                        >
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="registerPasswordConfirm">Confirmar Senha</label>
-                        <input
-                            type="password"
-                            id="registerPasswordConfirm"
-                            class="form-input"
-                            required
-                            minlength="6"
-                            placeholder="Digite a senha novamente"
-                        >
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Criar Conta</button>
-                    <div class="login-toggle">
-                        Já tem conta?
-                        <a onclick="toggleForms()">Faça login aqui</a>
-                    </div>
-                </form>
+            <div class="faq-item">
+                <div class="faq-question">Posso cancelar a qualquer momento?</div>
+                <div class="faq-answer">Sim! Você pode cancelar sua assinatura a qualquer momento. Você continuará com acesso até o fim do período pago.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Como funciona o plano FREE?</div>
+                <div class="faq-answer">No plano FREE, você pode responder até 10 questões por dia. O contador é resetado diariamente à meia-noite.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Quais métodos de pagamento são aceitos?</div>
+                <div class="faq-answer">Em breve aceitaremos PIX, cartão de crédito e boleto bancário. A integração de pagamento está sendo finalizada.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Posso mudar de plano depois?</div>
+                <div class="faq-answer">Sim! Você pode fazer upgrade ou downgrade do seu plano a qualquer momento. O valor será ajustado proporcionalmente.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">As questões são comentadas?</div>
+                <div class="faq-answer">Sim! Todas as questões possuem resolução comentada detalhada para você aprender com seus erros e acertos.</div>
             </div>
         </div>
     </div>
-
-    <!-- Modal de Reset de Senha -->
-    <div id="modalResetSenha" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <h2 style="margin-bottom: 20px;">Recuperar Senha</h2>
-            <p style="color: var(--gray-700); margin-bottom: 25px;">
-                Digite seu email e enviaremos um link para redefinir sua senha.
-            </p>
-            <form id="formResetSenha" onsubmit="enviarResetSenha(event)">
-                <div class="form-group">
-                    <label class="form-label" for="resetEmail">Email</label>
-                    <input
-                        type="email"
-                        id="resetEmail"
-                        class="form-input"
-                        required
-                        placeholder="seu@email.com"
-                    >
-                </div>
-                <div style="display: flex; gap: 12px; margin-top: 25px;">
-                    <button type="submit" class="btn btn-primary" style="flex: 1;">
-                        Enviar Link
-                    </button>
-                    <button type="button" class="btn" onclick="fecharResetSenha()">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
+    <script>
+        let usuarioLogado = false;
+
+        // Verificar autenticação SEM forçar login
+        window.addEventListener('DOMContentLoaded', async () => {
+            await verificarAutenticacao();
+            verificarNovoUsuario();
+        });
+
+        // Verificar se usuário está autenticado (sem redirecionar)
+        async function verificarAutenticacao() {
+            try {
+                const session = await Utils.checkAuth();
+
+                if (session && session.user) {
+                    // Usuário está logado
+                    usuarioLogado = true;
+                    document.getElementById('navLogado').style.display = 'flex';
+                    document.getElementById('navPublic').style.display = 'none';
+                    await carregarInfoPlano();
+                } else {
+                    // Usuário NÃO está logado - modo público
+                    usuarioLogado = false;
+                    document.getElementById('navPublic').style.display = 'flex';
+                    document.getElementById('navLogado').style.display = 'none';
+                }
+            } catch (error) {
+                // Erro ao verificar - assumir modo público
+                console.log('Modo público - usuário não autenticado');
+                usuarioLogado = false;
+                document.getElementById('navPublic').style.display = 'flex';
+                document.getElementById('navLogado').style.display = 'none';
+            }
+        }
+
+        // Verificar se é novo usuário
+        function verificarNovoUsuario() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isNewUser = urlParams.get('new_user') === 'true';
+
+            if (isNewUser) {
+                // Destacar visualmente que é novo usuário
+                const hero = document.querySelector('.hero');
+                if (hero) {
+                    hero.querySelector('h1').textContent = 'Bem-vindo! Escolha seu Plano';
+                    hero.querySelector('p').textContent = 'Comece grátis com 10 questões por dia ou escolha um plano premium para acesso ilimitado.';
+                }
+            }
+        }
+
+        // Carregar informações do plano atual
+        async function carregarInfoPlano() {
+            try {
+                const session = await Utils.checkAuth();
+                if (!session) return;
+
+                const userId = session.user.id;
+
+                // Buscar plano do usuário
+                const { data, error } = await supabaseClient
+                    .from('usuarios')
+                    .select('plano, questoes_respondidas_hoje, data_fim_plano')
+                    .eq('id', userId)
+                    .single();
+
+                if (error) throw error;
+
+                // Mostrar plano atual (opcional - pode adicionar badge "Plano Atual" no card)
+                console.log('Plano atual:', data.plano);
+            } catch (error) {
+                console.error('Erro ao carregar plano:', error);
+            }
+        }
+
+        // Selecionar plano
+        async function selecionarPlano(plano) {
+            // Se não estiver logado, redirecionar para cadastro
+            if (!usuarioLogado) {
+                Utils.showNotification('Faça login ou cadastre-se para escolher um plano!', 'info');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+                return;
+            }
+
+            if (plano === 'free') {
+                // Redirecionar para dashboard com plano FREE
+                Utils.showNotification('Plano FREE selecionado! Você tem 10 questões por dia.', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 800);
+            } else {
+                // Outros planos - mostrar mensagem de pagamento em breve
+                mostrarPagamentoEmBreve(plano);
+            }
+        }
+
+        // Mostrar mensagem de pagamento em breve
+        function mostrarPagamentoEmBreve(plano) {
+            // Se não estiver logado, redirecionar para cadastro
+            if (!usuarioLogado) {
+                Utils.showNotification('Faça login ou cadastre-se para assinar um plano!', 'info');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+                return;
+            }
+
+            Utils.showNotification(
+                `A integração de pagamento está sendo finalizada! Em breve você poderá assinar o plano ${plano}.`,
+                'info'
+            );
+        }
+
+        // Logout
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'login.html';
+        }
+    </script>
 </body>
 </html>

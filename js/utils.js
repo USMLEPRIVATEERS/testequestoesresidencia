@@ -13,7 +13,7 @@ class Utils {
     static async requireAuth() {
         const session = await this.checkAuth();
         if (!session) {
-            window.location.href = 'index.html';
+            window.location.href = 'login.html';
             return null;
         }
         return session;
@@ -22,7 +22,7 @@ class Utils {
     // Fazer logout
     static async logout() {
         await supabaseClient.auth.signOut();
-        window.location.href = 'index.html';
+        window.location.href = 'login.html';
     }
 
     // Formatar tempo em segundos para MM:SS

@@ -193,9 +193,9 @@
             <div class="logo">📚 Questões Residência</div>
             <!-- Navegação quando NÃO logado -->
             <nav class="nav" id="navPublic" style="display: none;">
-                <a href="planos.html" class="nav-link active">Planos</a>
-                <a href="index.html" class="btn" style="margin-left: 10px; padding: 8px 20px;">Login</a>
-                <a href="index.html#registro" class="btn btn-primary" style="padding: 8px 20px;">Cadastrar</a>
+                <a href="index.html" class="nav-link active">Planos</a>
+                <a href="login.html" class="btn" style="margin-left: 10px; padding: 8px 20px;">Login</a>
+                <a href="login.html#registro" class="btn btn-primary" style="padding: 8px 20px;">Cadastrar</a>
             </nav>
             <!-- Navegação quando logado -->
             <nav class="nav" id="navLogado" style="display: none;">
@@ -203,7 +203,7 @@
                 <a href="criar-teste.html" class="nav-link">Novo Teste</a>
                 <a href="testes-anteriores.html" class="nav-link">Testes Anteriores</a>
                 <a href="ranking.html" class="nav-link">Ranking</a>
-                <a href="planos.html" class="nav-link active">Planos</a>
+                <a href="index.html" class="nav-link active">Planos</a>
                 <a href="premios.html" class="nav-link">Prêmios</a>
                 <a href="#" class="nav-link" onclick="logout()">Sair</a>
             </nav>
@@ -237,11 +237,11 @@
                 </button>
             </div>
 
-            <!-- Plano MENSAL -->
-            <div class="plan-card">
-                <div class="plan-name">Mensal</div>
-                <div class="plan-price">R$ 60<small>/mês</small></div>
-                <div class="plan-period">Pago mensalmente</div>
+            <!-- Plano ANUAL (Featured) -->
+            <div class="plan-card featured">
+                <div class="plan-name">Anual</div>
+                <div class="plan-price">R$ 500<small>/ano</small></div>
+                <div class="plan-period">Economize R$ 220 (31% off)</div>
                 <ul class="plan-features">
                     <li>Questões ilimitadas</li>
                     <li>Todas as funcionalidades FREE</li>
@@ -249,14 +249,16 @@
                     <li>Estatísticas detalhadas</li>
                     <li>Ranking completo</li>
                     <li>Sem anúncios</li>
+                    <li><strong>12 meses de acesso total</strong></li>
+                    <li><strong>Melhor custo-benefício</strong></li>
                 </ul>
-                <button class="btn btn-primary plan-cta" onclick="mostrarPagamentoEmBreve('mensal')">
-                    Assinar Mensal
+                <button class="btn btn-primary plan-cta" onclick="mostrarPagamentoEmBreve('anual')">
+                    Assinar Anual
                 </button>
             </div>
 
-            <!-- Plano SEMESTRAL (Featured) -->
-            <div class="plan-card featured">
+            <!-- Plano SEMESTRAL -->
+            <div class="plan-card">
                 <div class="plan-name">Semestral</div>
                 <div class="plan-price">R$ 300<small>/6 meses</small></div>
                 <div class="plan-period">Economize R$ 60 (14% off)</div>
@@ -274,11 +276,11 @@
                 </button>
             </div>
 
-            <!-- Plano ANUAL -->
+            <!-- Plano MENSAL -->
             <div class="plan-card">
-                <div class="plan-name">Anual</div>
-                <div class="plan-price">R$ 500<small>/ano</small></div>
-                <div class="plan-period">Economize R$ 220 (31% off)</div>
+                <div class="plan-name">Mensal</div>
+                <div class="plan-price">R$ 60<small>/mês</small></div>
+                <div class="plan-period">Pago mensalmente</div>
                 <ul class="plan-features">
                     <li>Questões ilimitadas</li>
                     <li>Todas as funcionalidades FREE</li>
@@ -286,11 +288,9 @@
                     <li>Estatísticas detalhadas</li>
                     <li>Ranking completo</li>
                     <li>Sem anúncios</li>
-                    <li><strong>12 meses de acesso total</strong></li>
-                    <li><strong>Melhor custo-benefício</strong></li>
                 </ul>
-                <button class="btn btn-primary plan-cta" onclick="mostrarPagamentoEmBreve('anual')">
-                    Assinar Anual
+                <button class="btn btn-primary plan-cta" onclick="mostrarPagamentoEmBreve('mensal')">
+                    Assinar Mensal
                 </button>
             </div>
         </div>
@@ -409,7 +409,7 @@
             if (!usuarioLogado) {
                 Utils.showNotification('Faça login ou cadastre-se para escolher um plano!', 'info');
                 setTimeout(() => {
-                    window.location.href = 'index.html';
+                    window.location.href = 'login.html';
                 }, 1500);
                 return;
             }
@@ -432,7 +432,7 @@
             if (!usuarioLogado) {
                 Utils.showNotification('Faça login ou cadastre-se para assinar um plano!', 'info');
                 setTimeout(() => {
-                    window.location.href = 'index.html';
+                    window.location.href = 'login.html';
                 }, 1500);
                 return;
             }
@@ -446,7 +446,7 @@
         // Logout
         async function logout() {
             await supabaseClient.auth.signOut();
-            window.location.href = 'index.html';
+            window.location.href = 'login.html';
         }
     </script>
 </body>

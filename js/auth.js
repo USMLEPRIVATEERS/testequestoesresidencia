@@ -53,7 +53,7 @@ async function enviarResetSenha(event) {
         console.log('🔵 [RESET] Enviando email de recuperação para:', email);
 
         const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/index.html?action=reset-password`,
+            redirectTo: `${window.location.origin}/login.html?action=reset-password`,
         });
 
         if (error) {
