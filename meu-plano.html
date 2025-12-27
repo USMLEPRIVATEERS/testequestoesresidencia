@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Plano - Questões Residência</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .current-plan-section {
+            background: var(--white);
+            border: 4px solid var(--black);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .current-plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .current-plan-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--black);
+            letter-spacing: -1px;
+        }
+
+        .current-plan-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: var(--black);
+            color: var(--white);
+            border-radius: var(--radius-full);
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .current-plan-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            background: var(--gray-50);
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--gray-700);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .info-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--black);
+            letter-spacing: -1px;
+        }
+
+        .info-value.warning {
+            color: var(--error-color);
+        }
+
+        .info-value.success {
+            color: var(--success-color);
+        }
+
+        .plan-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .available-plans-section {
+            margin-top: 50px;
+        }
+
+        .section-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--black);
+            text-align: center;
+            margin-bottom: 40px;
+            letter-spacing: -1px;
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .plan-card {
+            background: var(--white);
+            border: 3px solid var(--black);
+            border-radius: var(--radius-xl);
+            padding: 35px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .plan-card.current {
+            border-color: var(--success-color);
+            border-width: 4px;
+            background: var(--gray-50);
+        }
+
+        .plan-card.featured {
+            border-color: var(--primary-color);
+            border-width: 4px;
+            transform: scale(1.05);
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            background: var(--black);
+            color: var(--white);
+            padding: 6px 16px;
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .plan-badge.current {
+            background: var(--success-color);
+        }
+
+        .plan-badge.popular {
+            background: var(--primary-color);
+        }
+
+        .plan-name {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--black);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+
+        .plan-price {
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--black);
+            margin-bottom: 5px;
+            letter-spacing: -2px;
+        }
+
+        .plan-price small {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .plan-period {
+            font-size: 14px;
+            color: var(--gray-700);
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            margin: 25px 0;
+            flex-grow: 1;
+        }
+
+        .plan-features li {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-200);
+            font-size: 15px;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+
+        .plan-features li::before {
+            content: "✓";
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .btn-plan {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: var(--radius);
+            border: 3px solid var(--black);
+            background: var(--black);
+            color: var(--white);
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 20px;
+        }
+
+        .btn-plan:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-plan:disabled {
+            background: var(--gray-300);
+            border-color: var(--gray-300);
+            color: var(--gray-600);
+            cursor: not-allowed;
+        }
+
+        .btn-plan.upgrade {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-plan.downgrade {
+            background: var(--white);
+            border-color: var(--black);
+            color: var(--black);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">QUESTÕES RESIDÊNCIA</div>
+            <nav class="nav">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="criar-teste.html" class="nav-link">Novo Teste</a>
+                <a href="testes-anteriores.html" class="nav-link">Testes Anteriores</a>
+                <a href="ranking.html" class="nav-link">Ranking</a>
+                <a href="meu-plano.html" class="nav-link active">Meu Plano</a>
+                <a href="premios.html" class="nav-link">Prêmios</a>
+                <a href="#" onclick="Utils.logout()" class="nav-link">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Loading -->
+        <div id="loading" class="loader">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div id="mainContent" class="hide">
+            <!-- Plano Atual -->
+            <div class="current-plan-section">
+                <div class="current-plan-header">
+                    <div>
+                        <h1 class="current-plan-title">Meu Plano Atual</h1>
+                    </div>
+                    <div>
+                        <span class="current-plan-badge" id="currentPlanName">FREE</span>
+                    </div>
+                </div>
+
+                <div class="current-plan-info" id="currentPlanInfo">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+
+                <div class="plan-actions">
+                    <button class="btn btn-primary" onclick="scrollToPlans()">
+                        🔥 Fazer Upgrade
+                    </button>
+                    <button class="btn" onclick="window.location.href='dashboard.html'">
+                        ← Voltar ao Dashboard
+                    </button>
+                </div>
+            </div>
+
+            <!-- Planos Disponíveis -->
+            <div class="available-plans-section">
+                <h2 class="section-title">Planos Disponíveis</h2>
+                <p style="text-align: center; color: var(--gray-700); margin-bottom: 40px; font-size: 18px;">
+                    Escolha o plano ideal para sua preparação
+                </p>
+
+                <div class="plans-grid">
+                    <!-- Plano FREE -->
+                    <div class="plan-card free" id="plan-free">
+                        <div class="plan-name">Free</div>
+                        <div class="plan-price">R$ 0<small>/mês</small></div>
+                        <div class="plan-period">Grátis para sempre</div>
+                        <ul class="plan-features">
+                            <li>15 questões por dia</li>
+                            <li>Estatísticas básicas</li>
+                            <li>Ranking público</li>
+                        </ul>
+                        <button class="btn-plan" id="btn-free" disabled>Plano Atual</button>
+                    </div>
+
+                    <!-- Plano ANUAL (Featured) -->
+                    <div class="plan-card featured" id="plan-anual">
+                        <span class="plan-badge popular">MAIS POPULAR</span>
+                        <div class="plan-name">Anual</div>
+                        <div class="plan-price">R$ 29<small>/mês</small></div>
+                        <div class="plan-period">R$ 348/ano (40% OFF)</div>
+                        <ul class="plan-features">
+                            <li>Questões ilimitadas</li>
+                            <li>Todas as provas disponíveis</li>
+                            <li>Estatísticas avançadas</li>
+                            <li>Filtros por assunto</li>
+                            <li>Histórico completo</li>
+                            <li>Suporte prioritário</li>
+                        </ul>
+                        <button class="btn-plan upgrade" id="btn-anual" onclick="selecionarPlano('anual')">
+                            Assinar Anual
+                        </button>
+                    </div>
+
+                    <!-- Plano SEMESTRAL -->
+                    <div class="plan-card" id="plan-semestral">
+                        <div class="plan-name">Semestral</div>
+                        <div class="plan-price">R$ 39<small>/mês</small></div>
+                        <div class="plan-period">R$ 234/semestre (20% OFF)</div>
+                        <ul class="plan-features">
+                            <li>Questões ilimitadas</li>
+                            <li>Todas as provas disponíveis</li>
+                            <li>Estatísticas avançadas</li>
+                            <li>Filtros por assunto</li>
+                            <li>Histórico completo</li>
+                            <li>Suporte prioritário</li>
+                        </ul>
+                        <button class="btn-plan upgrade" id="btn-semestral" onclick="selecionarPlano('semestral')">
+                            Assinar Semestral
+                        </button>
+                    </div>
+
+                    <!-- Plano MENSAL -->
+                    <div class="plan-card" id="plan-mensal">
+                        <div class="plan-name">Mensal</div>
+                        <div class="plan-price">R$ 49<small>/mês</small></div>
+                        <div class="plan-period">Renovação mensal</div>
+                        <ul class="plan-features">
+                            <li>Questões ilimitadas</li>
+                            <li>Todas as provas disponíveis</li>
+                            <li>Estatísticas avançadas</li>
+                            <li>Filtros por assunto</li>
+                            <li>Histórico completo</li>
+                            <li>Suporte prioritário</li>
+                        </ul>
+                        <button class="btn-plan upgrade" id="btn-mensal" onclick="selecionarPlano('mensal')">
+                            Assinar Mensal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        let userData = null;
+
+        // Carregar dados ao iniciar
+        window.addEventListener('DOMContentLoaded', async () => {
+            const session = await Utils.requireAuth();
+            if (!session) return;
+
+            await carregarDadosUsuario(session.user.id);
+        });
+
+        // Carregar dados do usuário
+        async function carregarDadosUsuario(userId) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('usuarios')
+                    .select('*')
+                    .eq('id', userId)
+                    .single();
+
+                if (error) throw error;
+
+                userData = data;
+                exibirPlanoAtual();
+                atualizarBotoesPlanos();
+
+                document.getElementById('loading').classList.add('hide');
+                document.getElementById('mainContent').classList.remove('hide');
+
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                Utils.showNotification('Erro ao carregar seus dados.', 'error');
+            }
+        }
+
+        // Exibir informações do plano atual
+        function exibirPlanoAtual() {
+            const plano = userData.plano || 'free';
+            const planoUpper = plano.toUpperCase();
+
+            // Nome do plano
+            document.getElementById('currentPlanName').textContent = planoUpper;
+
+            // Informações do plano
+            const infoContainer = document.getElementById('currentPlanInfo');
+            infoContainer.innerHTML = '';
+
+            if (plano === 'free') {
+                // Calcular questões restantes
+                const limite = 15;
+                const respondidas = userData.questoes_respondidas_hoje || 0;
+                const restantes = Math.max(0, limite - respondidas);
+
+                infoContainer.innerHTML = `
+                    <div class="info-item">
+                        <div class="info-label">Questões Hoje</div>
+                        <div class="info-value ${restantes === 0 ? 'warning' : ''}">${respondidas}/${limite}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Restantes Hoje</div>
+                        <div class="info-value ${restantes === 0 ? 'warning' : 'success'}">${restantes}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Status</div>
+                        <div class="info-value" style="font-size: 18px; font-weight: 700;">
+                            ${restantes > 0 ? '✅ Ativo' : '⚠️ Limite Atingido'}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Plano premium
+                const dataExpiracao = userData.data_expiracao_plano ? new Date(userData.data_expiracao_plano) : null;
+                const hoje = new Date();
+                const diasRestantes = dataExpiracao ? Math.ceil((dataExpiracao - hoje) / (1000 * 60 * 60 * 24)) : 0;
+
+                infoContainer.innerHTML = `
+                    <div class="info-item">
+                        <div class="info-label">Questões</div>
+                        <div class="info-value success">Ilimitadas</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Expira em</div>
+                        <div class="info-value ${diasRestantes <= 7 ? 'warning' : ''}">${diasRestantes} dias</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Data de Expiração</div>
+                        <div class="info-value" style="font-size: 16px; font-weight: 700;">
+                            ${dataExpiracao ? dataExpiracao.toLocaleDateString('pt-BR') : '-'}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Status</div>
+                        <div class="info-value success" style="font-size: 18px; font-weight: 700;">✅ Ativo</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Atualizar botões dos planos
+        function atualizarBotoesPlanos() {
+            const planoAtual = userData.plano || 'free';
+
+            // Resetar todos os cartões
+            document.querySelectorAll('.plan-card').forEach(card => {
+                card.classList.remove('current');
+            });
+
+            // Resetar todos os botões
+            document.querySelectorAll('.btn-plan').forEach(btn => {
+                btn.disabled = false;
+            });
+
+            // Marcar plano atual
+            const cardAtual = document.getElementById(`plan-${planoAtual}`);
+            const btnAtual = document.getElementById(`btn-${planoAtual}`);
+
+            if (cardAtual) {
+                cardAtual.classList.add('current');
+
+                // Adicionar badge "Plano Atual" se não for featured
+                if (!cardAtual.classList.contains('featured')) {
+                    const badge = document.createElement('span');
+                    badge.className = 'plan-badge current';
+                    badge.textContent = 'PLANO ATUAL';
+                    cardAtual.appendChild(badge);
+                }
+            }
+
+            if (btnAtual) {
+                btnAtual.disabled = true;
+                btnAtual.textContent = 'Plano Atual';
+            }
+
+            // Se for FREE, todos os outros são upgrade
+            if (planoAtual === 'free') {
+                document.querySelectorAll('.btn-plan:not(#btn-free)').forEach(btn => {
+                    btn.classList.add('upgrade');
+                });
+            } else {
+                // Se for premium, FREE é downgrade
+                const btnFree = document.getElementById('btn-free');
+                if (btnFree) {
+                    btnFree.disabled = false;
+                    btnFree.classList.add('downgrade');
+                    btnFree.textContent = 'Cancelar Assinatura';
+                    btnFree.onclick = () => cancelarAssinatura();
+                }
+            }
+        }
+
+        // Selecionar plano
+        function selecionarPlano(plano) {
+            Utils.showNotification('Pagamento em breve! Sistema em desenvolvimento.', 'info');
+            console.log('Plano selecionado:', plano);
+        }
+
+        // Cancelar assinatura
+        function cancelarAssinatura() {
+            if (confirm('Tem certeza que deseja cancelar sua assinatura? Você voltará para o plano FREE.')) {
+                Utils.showNotification('Cancelamento em breve! Sistema em desenvolvimento.', 'info');
+            }
+        }
+
+        // Scroll suave para planos
+        function scrollToPlans() {
+            document.querySelector('.available-plans-section').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    </script>
+</body>
+</html>
