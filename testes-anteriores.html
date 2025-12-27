@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testes Anteriores - Questões Residência</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">QUESTÕES RESIDÊNCIA</div>
+            <nav class="nav">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="criar-teste.html" class="nav-link">Novo Teste</a>
+                <a href="testes-anteriores.html" class="nav-link active">Testes Anteriores</a>
+                <a href="#" onclick="Utils.logout()" class="nav-link">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1 class="mb-30">Meus Testes</h1>
+
+        <!-- Filtros de status -->
+        <div class="card mb-30">
+            <div class="card-body">
+                <div class="flex gap-10">
+                    <button class="btn btn-primary" onclick="filtrarTestes('todos')" id="btnTodos">Todos</button>
+                    <button class="btn" onclick="filtrarTestes('em_andamento')" id="btnEmAndamento">Em Andamento</button>
+                    <button class="btn" onclick="filtrarTestes('pausado')" id="btnPausado">Pausados</button>
+                    <button class="btn" onclick="filtrarTestes('finalizado')" id="btnFinalizado">Finalizados</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de testes -->
+        <div id="listaTestes">
+            <div class="loader">
+                <div class="spinner"></div>
+            </div>
+        </div>
+
+        <!-- Mensagem quando não há testes -->
+        <div id="semTestes" class="hide">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3>Nenhum teste encontrado</h3>
+                    <p class="mt-20">Comece criando um novo teste!</p>
+                    <a href="criar-teste.html" class="btn btn-primary mt-20">Criar Novo Teste</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmação -->
+    <div id="modalConfirmacao" class="modal">
+        <div class="modal-content">
+            <h3 class="mb-20">Refazer Teste</h3>
+            <p class="mb-20">
+                Ao refazer este teste, você poderá responder as mesmas questões novamente.
+                As respostas anteriores serão mantidas no histórico.
+            </p>
+            <div class="flex gap-10">
+                <button class="btn btn-primary" onclick="confirmarRefazer()">Refazer</button>
+                <button class="btn" onclick="fecharModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/testes-anteriores.js"></script>
+</body>
+</html>

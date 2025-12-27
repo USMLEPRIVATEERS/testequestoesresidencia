@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste em Andamento - Questões Residência</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .test-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: var(--background-color);
+            border-right: 2px solid var(--border-color);
+            overflow-y: auto;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .sidebar.closed {
+            transform: translateX(-100%);
+            position: absolute;
+        }
+
+        .main-test-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding-bottom: 80px;
+        }
+
+        .test-header {
+            padding: 20px;
+            border-bottom: 2px solid var(--border-color);
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .test-body {
+            flex: 1;
+            padding: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .question-navigation {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--background-color);
+            border-top: 2px solid var(--border-color);
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .question-text {
+            font-size: 18px;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            white-space: pre-wrap;
+        }
+
+        .resolucao-comentada {
+            margin-top: 30px;
+            padding: 20px;
+            border-left: 4px solid var(--primary-color);
+            background-color: var(--hover-color);
+        }
+
+        .comentarios-section {
+            margin-top: 30px;
+            border-top: 2px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .comentario-item {
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+
+        .comentario-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .questao-imagens {
+            margin-bottom: 30px;
+        }
+
+        .questao-imagem {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid var(--border-color);
+            margin-bottom: 15px;
+            display: block;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .questao-imagem:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        .imagem-container {
+            margin-bottom: 15px;
+        }
+
+        .imagem-legenda {
+            font-size: 14px;
+            color: var(--secondary-color);
+            margin-top: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <!-- Sidebar com lista de questões -->
+        <div id="sidebar" class="sidebar">
+            <div class="flex-between mb-20">
+                <h3>Questões</h3>
+                <button class="btn btn-small" onclick="toggleSidebar()">Fechar</button>
+            </div>
+            <ul id="questionList" class="question-list"></ul>
+        </div>
+
+        <!-- Conteúdo principal -->
+        <div class="main-test-content">
+            <!-- Header do teste -->
+            <div class="test-header">
+                <div class="flex gap-20">
+                    <button class="btn btn-small" onclick="toggleSidebar()" id="btnToggleSidebar">☰ Menu</button>
+                    <div>
+                        <strong>Modo:</strong> <span id="modoTeste">-</span>
+                    </div>
+                    <div>
+                        <strong>Questão:</strong> <span id="questaoNumero">-</span> de <span id="questaoTotal">-</span>
+                    </div>
+                </div>
+                <div class="timer" id="timer">00:00</div>
+            </div>
+
+            <!-- Corpo do teste com a questão -->
+            <div class="test-body">
+                <div id="questaoContainer">
+                    <!-- Informações da questão -->
+                    <div class="mb-20" style="font-size: 14px; color: var(--secondary-color);">
+                        <span id="questaoInfo"></span>
+                    </div>
+
+                    <!-- Imagens da questão -->
+                    <div id="imagensContainer" class="questao-imagens"></div>
+
+                    <!-- Texto da questão -->
+                    <div class="question-text" id="questaoTexto"></div>
+
+                    <!-- Alternativas -->
+                    <div id="alternativasContainer"></div>
+
+                    <!-- Botão para ver resposta (modo aprendizado) -->
+                    <div id="btnVerRespostaContainer" class="hide mt-30">
+                        <button class="btn btn-primary" onclick="verResposta()">Ver Resposta</button>
+                    </div>
+
+                    <!-- Gabarito -->
+                    <div id="gabaritoContainer" class="hide mt-30"></div>
+
+                    <!-- Resolução comentada -->
+                    <div id="resolucaoContainer" class="hide"></div>
+
+                    <!-- Comentários -->
+                    <div id="comentariosContainer" class="hide comentarios-section"></div>
+                </div>
+
+                <!-- Resultado final (modo simulado) -->
+                <div id="resultadoFinal" class="hide">
+                    <div class="card">
+                        <div class="card-title">Teste Finalizado!</div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-3">
+                                    <div class="stat-box">
+                                        <div class="stat-value" id="resultadoCorretas">-</div>
+                                        <div class="stat-label">Corretas</div>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="stat-box">
+                                        <div class="stat-value" id="resultadoIncorretas">-</div>
+                                        <div class="stat-label">Incorretas</div>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="stat-box">
+                                        <div class="stat-value" id="resultadoPorcentagem">-</div>
+                                        <div class="stat-label">% Acertos</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-20">
+                                <div class="col-2">
+                                    <div class="stat-box">
+                                        <div class="stat-value" id="resultadoTempoTotal">-</div>
+                                        <div class="stat-label">Tempo Total</div>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div class="stat-box">
+                                        <div class="stat-value" id="resultadoTempoPorQuestao">-</div>
+                                        <div class="stat-label">Tempo/Questão</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex gap-10 mt-30">
+                                <button class="btn btn-primary" onclick="revisarQuestoes()">Revisar Questões</button>
+                                <a href="dashboard.html" class="btn">Voltar ao Dashboard</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navegação do teste (fixado no rodapé) -->
+    <div class="question-navigation">
+        <button class="btn" onclick="questaoAnterior()" id="btnAnterior">← Anterior</button>
+        <button class="btn btn-primary" onclick="pausarTeste()">⏸ Pausar</button>
+        <button class="btn btn-danger" onclick="finalizarTeste()">✓ Finalizar</button>
+        <button class="btn" onclick="proximaQuestao()" id="btnProxima">Próxima →</button>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/teste.js"></script>
+</body>
+</html>

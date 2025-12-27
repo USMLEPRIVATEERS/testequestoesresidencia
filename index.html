@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questões Residência - Login</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h1 class="login-title">QUESTÕES RESIDÊNCIA</h1>
+
+            <!-- Formulário de Login -->
+            <div id="loginForm" class="form-container">
+                <h2 class="mb-20">Login</h2>
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="loginEmail">Email</label>
+                        <input
+                            type="email"
+                            id="loginEmail"
+                            class="form-input"
+                            required
+                            placeholder="seu@email.com"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="loginPassword">Senha</label>
+                        <input
+                            type="password"
+                            id="loginPassword"
+                            class="form-input"
+                            required
+                            placeholder="********"
+                        >
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+                    <div class="login-toggle">
+                        Não tem conta?
+                        <a onclick="toggleForms()">Registre-se aqui</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Formulário de Registro -->
+            <div id="registerForm" class="form-container hide">
+                <h2 class="mb-20">Criar Conta</h2>
+                <form onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="registerName">Nome Completo</label>
+                        <input
+                            type="text"
+                            id="registerName"
+                            class="form-input"
+                            required
+                            placeholder="Seu nome completo"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="registerEmail">Email</label>
+                        <input
+                            type="email"
+                            id="registerEmail"
+                            class="form-input"
+                            required
+                            placeholder="seu@email.com"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="registerPassword">Senha</label>
+                        <input
+                            type="password"
+                            id="registerPassword"
+                            class="form-input"
+                            required
+                            minlength="6"
+                            placeholder="Mínimo 6 caracteres"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="registerPasswordConfirm">Confirmar Senha</label>
+                        <input
+                            type="password"
+                            id="registerPasswordConfirm"
+                            class="form-input"
+                            required
+                            minlength="6"
+                            placeholder="Digite a senha novamente"
+                        >
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Criar Conta</button>
+                    <div class="login-toggle">
+                        Já tem conta?
+                        <a onclick="toggleForms()">Faça login aqui</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

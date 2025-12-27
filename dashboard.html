@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Questões Residência</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">QUESTÕES RESIDÊNCIA</div>
+            <nav class="nav">
+                <a href="dashboard.html" class="nav-link active">Dashboard</a>
+                <a href="criar-teste.html" class="nav-link">Novo Teste</a>
+                <a href="testes-anteriores.html" class="nav-link">Testes Anteriores</a>
+                <a href="#" onclick="Utils.logout()" class="nav-link">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Bem-vindo -->
+        <div class="mb-30">
+            <h1 id="welcomeMessage">Bem-vindo!</h1>
+        </div>
+
+        <!-- Estatísticas Gerais -->
+        <div class="row">
+            <div class="col-4">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalQuestoes">-</div>
+                    <div class="stat-label">Total de Questões</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="stat-box">
+                    <div class="stat-value" id="questoesRealizadas">-</div>
+                    <div class="stat-label">Questões Realizadas</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="stat-box">
+                    <div class="stat-value" id="percentualConcluido">-</div>
+                    <div class="stat-label">% Concluído</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-4">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalCorretas" style="color: var(--success-color)">-</div>
+                    <div class="stat-label">Questões Corretas</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalIncorretas" style="color: var(--error-color)">-</div>
+                    <div class="stat-label">Questões Incorretas</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="stat-box">
+                    <div class="stat-value" id="percentualAcertos">-</div>
+                    <div class="stat-label">% de Acertos</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Provas Selecionadas -->
+        <div class="card mt-30">
+            <div class="card-title">Provas Selecionadas</div>
+            <div class="card-body">
+                <div id="provasSelecionadas" class="mb-20">
+                    <p>Carregando...</p>
+                </div>
+                <button class="btn btn-primary" onclick="editarProvas()">Editar Provas</button>
+            </div>
+        </div>
+
+        <!-- Gráfico de Desempenho -->
+        <div class="card mt-30">
+            <div class="card-title">Desempenho ao Longo do Tempo</div>
+            <div class="card-body">
+                <!-- Controles do Gráfico -->
+                <div class="flex-between mb-20">
+                    <div>
+                        <label class="form-label">Período:</label>
+                        <select id="periodoPicker" class="form-select" onchange="atualizarGrafico()" style="width: 150px;">
+                            <option value="diario">Diário</option>
+                            <option value="semanal">Semanal</option>
+                            <option value="mensal">Mensal</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Métrica:</label>
+                        <select id="metricaPicker" class="form-select" onchange="atualizarGrafico()" style="width: 200px;">
+                            <option value="total">Total de Questões</option>
+                            <option value="corretas">Questões Corretas</option>
+                            <option value="incorretas">Questões Incorretas</option>
+                            <option value="porcentagem_acertos">% de Acertos</option>
+                            <option value="porcentagem_erros">% de Erros</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Container do Gráfico -->
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar provas -->
+    <div id="modalProvas" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="fecharModalProvas()">&times;</span>
+            <h2 class="mb-20">Selecionar Provas</h2>
+            <div id="listaProvas">
+                <p>Carregando provas disponíveis...</p>
+            </div>
+            <div class="flex gap-10 mt-30">
+                <button class="btn btn-primary" onclick="salvarProvas()">Salvar</button>
+                <button class="btn" onclick="fecharModalProvas()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

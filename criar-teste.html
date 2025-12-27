@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Teste - Questões Residência</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">QUESTÕES RESIDÊNCIA</div>
+            <nav class="nav">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="criar-teste.html" class="nav-link active">Novo Teste</a>
+                <a href="testes-anteriores.html" class="nav-link">Testes Anteriores</a>
+                <a href="#" onclick="Utils.logout()" class="nav-link">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1 class="mb-30">Criar Novo Teste</h1>
+
+        <!-- Seleção de Modo -->
+        <div class="card mb-30">
+            <div class="card-title">Modo de Teste</div>
+            <div class="card-body">
+                <div class="flex gap-20">
+                    <label class="flex" style="align-items: center; cursor: pointer;">
+                        <input
+                            type="radio"
+                            name="modo"
+                            value="aprendizado"
+                            checked
+                            style="margin-right: 8px;"
+                        >
+                        <div>
+                            <strong>Modo Aprendizado</strong>
+                            <p style="margin: 5px 0 0 0; color: var(--secondary-color); font-size: 14px;">
+                                Veja o gabarito imediatamente após responder cada questão
+                            </p>
+                        </div>
+                    </label>
+                    <label class="flex" style="align-items: center; cursor: pointer;">
+                        <input
+                            type="radio"
+                            name="modo"
+                            value="simulado"
+                            style="margin-right: 8px;"
+                        >
+                        <div>
+                            <strong>Modo Simulado</strong>
+                            <p style="margin: 5px 0 0 0; color: var(--secondary-color); font-size: 14px;">
+                                Responda todas as questões antes de ver os gabaritos
+                            </p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <h3 class="mb-20">Filtros de Questões</h3>
+
+            <div class="filter-row">
+                <div class="form-group">
+                    <label class="form-label">Instituição</label>
+                    <select id="filtroInstituicao" class="form-select" onchange="atualizarFiltros()">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Processo Seletivo</label>
+                    <select id="filtroProcesso" class="form-select" onchange="atualizarFiltros()">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Ano</label>
+                    <select id="filtroAno" class="form-select" onchange="atualizarFiltros()">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tipo de Questão</label>
+                    <select id="filtroTipo" class="form-select" onchange="atualizarFiltros()">
+                        <option value="">Todos</option>
+                        <option value="multipla_escolha">Múltipla Escolha</option>
+                        <option value="verdadeiro_falso">Verdadeiro/Falso</option>
+                        <option value="dissertativa">Dissertativa</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-row">
+                <div class="form-group">
+                    <label class="form-label">Dificuldade</label>
+                    <select id="filtroDificuldade" class="form-select" onchange="atualizarFiltros()">
+                        <option value="">Todas</option>
+                        <option value="Fácil">Fácil (&gt;60%)</option>
+                        <option value="Intermediário">Intermediário (40-60%)</option>
+                        <option value="Difícil">Difícil (&lt;40%)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Assunto</label>
+                    <select id="filtroAssunto" class="form-select" onchange="atualizarFiltros()">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Sistema</label>
+                    <select id="filtroSistema" class="form-select" onchange="atualizarFiltros()">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Categoria</label>
+                    <select id="filtroCategoria" class="form-select" onchange="atualizarFiltros()">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-row">
+                <div class="form-group">
+                    <label class="form-label">Tópico</label>
+                    <select id="filtroTopico" class="form-select" onchange="atualizarFiltros()">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Subtópico</label>
+                    <select id="filtroSubtopico" class="form-select" onchange="atualizarFiltros()">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn btn-primary mt-20" onclick="limparFiltros()">Limpar Filtros</button>
+        </div>
+
+        <!-- Informações sobre questões disponíveis -->
+        <div class="card">
+            <div class="card-body">
+                <div class="flex-between">
+                    <div>
+                        <h3>Questões Disponíveis: <span id="totalQuestoesDisponiveis">0</span></h3>
+                        <p style="color: var(--secondary-color); margin-top: 5px;">
+                            Questões que você ainda não respondeu com os filtros aplicados
+                        </p>
+                    </div>
+                    <div class="flex gap-10" style="align-items: center;">
+                        <div class="form-group" style="margin: 0;">
+                            <label class="form-label">Quantidade de Questões:</label>
+                            <input
+                                type="number"
+                                id="quantidadeQuestoes"
+                                class="form-input"
+                                min="1"
+                                max="100"
+                                value="20"
+                                style="width: 100px;"
+                            >
+                        </div>
+                        <button
+                            class="btn btn-primary btn-large"
+                            onclick="iniciarTeste()"
+                            id="btnIniciarTeste"
+                        >
+                            Iniciar Teste
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/criar-teste.js"></script>
+</body>
+</html>
