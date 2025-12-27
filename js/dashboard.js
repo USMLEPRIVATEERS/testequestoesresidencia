@@ -268,27 +268,42 @@ async function abrirModalEditarPerfil() {
         // Parsear WhatsApp
         if (data.whatsapp) {
             const whatsapp = data.whatsapp;
+            console.log('🔵 [EDIT] WhatsApp original:', whatsapp);
+
             // Formato: +5511999999999
             const countryCodeMatch = whatsapp.match(/^\+\d{1,3}/);
+            console.log('🔵 [EDIT] Country code match:', countryCodeMatch);
+
             if (countryCodeMatch) {
                 const countryCode = countryCodeMatch[0];
+                console.log('🔵 [EDIT] Country code extraído:', countryCode);
+
                 document.getElementById('editWhatsappCountryCode').value = countryCode;
 
                 const restNumber = whatsapp.substring(countryCode.length);
+                console.log('🔵 [EDIT] Resto do número:', restNumber);
 
                 // Se for Brasil (+55), separar DDD e número
                 if (countryCode === '+55' && restNumber.length >= 10) {
-                    document.getElementById('editWhatsappDDD').value = restNumber.substring(0, 2);
-                    document.getElementById('editWhatsappNumber').value = restNumber.substring(2);
+                    const ddd = restNumber.substring(0, 2);
+                    const numero = restNumber.substring(2);
+                    console.log('🔵 [EDIT] DDD:', ddd, 'Número:', numero);
+
+                    document.getElementById('editWhatsappDDD').value = ddd;
+                    document.getElementById('editWhatsappNumber').value = numero;
                 } else {
                     // Outros países: colocar tudo no número
+                    console.log('🔵 [EDIT] País não é Brasil, número completo:', restNumber);
                     document.getElementById('editWhatsappDDD').value = '';
                     document.getElementById('editWhatsappNumber').value = restNumber;
                 }
             }
         }
 
-        updateEditWhatsappFields();
+        // Aguardar um pouco antes de chamar updateEditWhatsappFields
+        setTimeout(() => {
+            updateEditWhatsappFields();
+        }, 100);
 
         // Mostrar modal
         document.getElementById('modalEditarPerfil').classList.add('active');
