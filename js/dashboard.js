@@ -279,31 +279,41 @@ async function abrirModalEditarPerfil() {
                 console.log('🔵 [EDIT] Country code extraído:', countryCode);
 
                 document.getElementById('editWhatsappCountryCode').value = countryCode;
+                console.log('🔵 [EDIT] Country code setado:', document.getElementById('editWhatsappCountryCode').value);
 
                 const restNumber = whatsapp.substring(countryCode.length);
-                console.log('🔵 [EDIT] Resto do número:', restNumber);
+                console.log('🔵 [EDIT] Resto do número:', restNumber, '(length:', restNumber.length + ')');
 
                 // Se for Brasil (+55), separar DDD e número
                 if (countryCode === '+55' && restNumber.length >= 10) {
                     const ddd = restNumber.substring(0, 2);
                     const numero = restNumber.substring(2);
-                    console.log('🔵 [EDIT] DDD:', ddd, 'Número:', numero);
+                    console.log('🔵 [EDIT] É Brasil! DDD:', ddd, 'Número:', numero);
 
                     document.getElementById('editWhatsappDDD').value = ddd;
                     document.getElementById('editWhatsappNumber').value = numero;
+
+                    console.log('🔵 [EDIT] Valores setados:');
+                    console.log('  ✓ DDD input:', document.getElementById('editWhatsappDDD').value);
+                    console.log('  ✓ Número input:', document.getElementById('editWhatsappNumber').value);
                 } else {
                     // Outros países: colocar tudo no número
-                    console.log('🔵 [EDIT] País não é Brasil, número completo:', restNumber);
+                    console.log('🔵 [EDIT] Não é Brasil, número completo:', restNumber);
                     document.getElementById('editWhatsappDDD').value = '';
                     document.getElementById('editWhatsappNumber').value = restNumber;
                 }
             }
         }
 
-        // Aguardar um pouco antes de chamar updateEditWhatsappFields
-        setTimeout(() => {
-            updateEditWhatsappFields();
-        }, 100);
+        console.log('🟡 [EDIT] ANTES de chamar updateEditWhatsappFields():');
+        console.log('  - Country:', document.getElementById('editWhatsappCountryCode').value);
+        console.log('  - DDD:', document.getElementById('editWhatsappDDD').value);
+        console.log('  - Número:', document.getElementById('editWhatsappNumber').value);
+
+        // NÃO chamar updateEditWhatsappFields - pode estar bagunçando os valores!
+        // setTimeout(() => {
+        //     updateEditWhatsappFields();
+        // }, 100);
 
         // Mostrar modal
         document.getElementById('modalEditarPerfil').classList.add('active');
