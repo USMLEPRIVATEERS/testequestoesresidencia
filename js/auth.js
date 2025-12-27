@@ -19,6 +19,63 @@ function toggleForms() {
     registerForm.classList.toggle('hide');
 }
 
+// Mostrar modal de reset de senha
+function mostrarResetSenha() {
+    const modal = document.getElementById('modalResetSenha');
+    modal.classList.add('active');
+}
+
+// Fechar modal de reset de senha
+function fecharResetSenha() {
+    const modal = document.getElementById('modalResetSenha');
+    modal.classList.remove('active');
+    document.getElementById('formResetSenha').reset();
+}
+
+// Enviar email de reset de senha
+async function enviarResetSenha(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('resetEmail').value;
+
+    try {
+        console.log('🔵 [RESET] Enviando email de recuperação para:', email);
+
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/index.html?action=reset-password`,
+        });
+
+        if (error) {
+            console.error('❌ [RESET] Erro ao enviar email:', error);
+            throw error;
+        }
+
+        console.log('✅ [RESET] Email enviado com sucesso');
+
+        Utils.showNotification(
+            'Email de recuperação enviado! Verifique sua caixa de entrada.',
+            'success'
+        );
+
+        fecharResetSenha();
+
+    } catch (error) {
+        console.error('❌ [RESET] Erro ao enviar email de recuperação:', error);
+        Utils.showNotification(
+            'Erro ao enviar email: ' + error.message,
+            'error'
+        );
+    }
+}
+
+// Fechar modal ao clicar fora
+window.addEventListener('click', (event) => {
+    const modal = document.getElementById('modalResetSenha');
+    if (modal && event.target === modal) {
+        fecharResetSenha();
+    }
+});
+
 // Manipular login
 async function handleLogin(event) {
     event.preventDefault();
@@ -89,28 +146,44 @@ async function handleRegister(event) {
     }
 
     try {
+        console.log('🔵 [SIGNUP] Iniciando cadastro com dados:', { name, email, whatsapp });
+
         // Criar usuário no Supabase Auth
         const { data: authData, error: authError } = await supabaseClient.auth.signUp({
             email: email,
             password: password,
         });
 
-        if (authError) throw authError;
+        if (authError) {
+            console.error('❌ [SIGNUP] Erro no Supabase Auth:', authError);
+            throw authError;
+        }
+
+        console.log('✅ [SIGNUP] Usuário criado no Auth:', authData.user.id);
 
         // Criar registro na tabela usuarios
-        const { error: dbError } = await supabaseClient
-            .from('usuarios')
-            .insert([
-                {
-                    id: authData.user.id,
-                    email: email,
-                    nome: name,
-                    whatsapp: whatsapp,
-                    provas_selecionadas: [],
-                }
-            ]);
+        const dadosUsuario = {
+            id: authData.user.id,
+            email: email,
+            nome: name,
+            whatsapp: whatsapp,
+            provas_selecionadas: [],
+        };
 
-        if (dbError) throw dbError;
+        console.log('🔵 [SIGNUP] Inserindo na tabela usuarios:', dadosUsuario);
+
+        const { data: insertData, error: dbError } = await supabaseClient
+            .from('usuarios')
+            .insert([dadosUsuario])
+            .select();
+
+        if (dbError) {
+            console.error('❌ [SIGNUP] Erro ao inserir na tabela usuarios:', dbError);
+            console.error('❌ [SIGNUP] Detalhes do erro:', JSON.stringify(dbError, null, 2));
+            throw dbError;
+        }
+
+        console.log('✅ [SIGNUP] Dados salvos na tabela usuarios:', insertData);
 
         Utils.showNotification('Conta criada com sucesso! Escolha seu plano.', 'success');
 
@@ -120,7 +193,8 @@ async function handleRegister(event) {
         }, 1000);
 
     } catch (error) {
-        console.error('Erro no registro:', error);
+        console.error('❌ [SIGNUP] Erro geral no registro:', error);
+        console.error('❌ [SIGNUP] Stack trace:', error.stack);
         Utils.showNotification('Erro ao criar conta: ' + error.message, 'error');
     }
 }

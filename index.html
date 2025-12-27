@@ -37,6 +37,7 @@
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">Entrar</button>
                     <div class="login-toggle">
+                        <a onclick="mostrarResetSenha()" style="font-size: 14px; display: block; margin-bottom: 10px;">Esqueceu sua senha?</a>
                         Não tem conta?
                         <a onclick="toggleForms()">Registre-se aqui</a>
                     </div>
@@ -184,6 +185,36 @@
                     </div>
                 </form>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal de Reset de Senha -->
+    <div id="modalResetSenha" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2 style="margin-bottom: 20px;">Recuperar Senha</h2>
+            <p style="color: var(--gray-700); margin-bottom: 25px;">
+                Digite seu email e enviaremos um link para redefinir sua senha.
+            </p>
+            <form id="formResetSenha" onsubmit="enviarResetSenha(event)">
+                <div class="form-group">
+                    <label class="form-label" for="resetEmail">Email</label>
+                    <input
+                        type="email"
+                        id="resetEmail"
+                        class="form-input"
+                        required
+                        placeholder="seu@email.com"
+                    >
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 25px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        Enviar Link
+                    </button>
+                    <button type="button" class="btn" onclick="fecharResetSenha()">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
