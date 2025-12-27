@@ -623,36 +623,438 @@ h4 { font-size: 20px; }
 .gap-10 { gap: 10px; }
 .gap-20 { gap: 20px; }
 
-/* Responsividade */
+/* ============================================
+   RESPONSIVIDADE MOBILE
+   ============================================ */
+
+/* Tablets e dispositivos menores */
+@media (max-width: 1024px) {
+    .container {
+        padding: 15px;
+    }
+
+    .filter-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Smartphones em landscape e tablets pequenos */
 @media (max-width: 768px) {
+    /* Grid System Mobile */
     .col-2, .col-3, .col-4 {
         flex: 0 0 100%;
     }
 
-    .sidebar {
-        width: 100%;
+    .row {
+        gap: 15px;
     }
 
-    .main-content {
-        margin-left: 0;
+    /* Container */
+    .container {
+        padding: 10px;
     }
 
-    .test-navigation {
-        flex-wrap: wrap;
+    /* Header Mobile */
+    .header {
+        padding: 15px 0;
+        margin-bottom: 20px;
     }
 
     .header-content {
         flex-direction: column;
         gap: 15px;
+        padding: 0 10px;
     }
 
+    .logo {
+        font-size: 20px;
+        text-align: center;
+    }
+
+    /* Navegação Mobile */
     .nav {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
         width: 100%;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .nav-link {
+        padding: 8px 12px;
+        font-size: 14px;
+        flex: 1 1 auto;
+        min-width: 80px;
+        text-align: center;
+    }
+
+    /* Títulos Mobile */
+    h1 { font-size: 24px; }
+    h2 { font-size: 22px; }
+    h3 { font-size: 20px; }
+    h4 { font-size: 18px; }
+
+    /* Cards Mobile */
+    .card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .card-title {
+        font-size: 18px;
+    }
+
+    /* Botões Mobile - Maiores para touch */
+    .btn {
+        padding: 14px 20px;
+        font-size: 16px;
+        min-height: 44px; /* Apple HIG recomenda mínimo 44x44 */
+    }
+
+    .btn-small {
+        padding: 10px 14px;
+        font-size: 14px;
+        min-height: 36px;
+    }
+
+    .btn-large {
+        padding: 16px 24px;
+        font-size: 18px;
+    }
+
+    /* Formulários Mobile */
+    .form-input,
+    .form-select,
+    .form-textarea {
+        padding: 14px;
+        font-size: 16px; /* Evita zoom automático no iOS */
+        min-height: 44px;
+    }
+
+    .form-label {
+        font-size: 14px;
+    }
+
+    /* Filtros Mobile */
+    .filters-section {
+        padding: 15px;
     }
 
     .filter-row {
         grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    /* Sidebar Mobile */
+    .sidebar {
+        width: 100%;
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 999;
+        transform: translateX(-100%);
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 10px;
+    }
+
+    /* Navegação do Teste Mobile */
+    .test-navigation {
+        flex-wrap: wrap;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .test-navigation .btn {
+        flex: 1 1 45%;
+        min-width: 120px;
+    }
+
+    /* Tabelas Mobile - Scroll horizontal */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        min-width: 600px;
+    }
+
+    .table th,
+    .table td {
+        padding: 10px 8px;
+        font-size: 14px;
+    }
+
+    /* Estatísticas Mobile */
+    .stat-box {
+        padding: 15px 10px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+    }
+
+    .stat-label {
+        font-size: 12px;
+    }
+
+    /* Alternativas Mobile */
+    .alternative {
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+
+    /* Modal Mobile */
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+        max-height: 85vh;
+    }
+
+    .modal-close {
+        font-size: 24px;
+    }
+
+    /* Gráficos Mobile */
+    .chart-container {
+        height: 250px;
+    }
+
+    /* Notificações Mobile */
+    .notification {
+        right: 10px;
+        left: 10px;
+        top: 10px;
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+
+    /* Login Mobile */
+    .login-box {
+        padding: 25px;
+    }
+
+    .login-title {
+        font-size: 22px;
+    }
+
+    /* Flex utilities mobile */
+    .flex-between {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .flex-between.keep-row {
+        flex-direction: row;
+    }
+}
+
+/* Smartphones em portrait */
+@media (max-width: 480px) {
+    /* Container extra pequeno */
+    .container {
+        padding: 8px;
+    }
+
+    /* Header muito pequeno */
+    .header {
+        padding: 10px 0;
+    }
+
+    .logo {
+        font-size: 18px;
+    }
+
+    /* Navegação ultra compacta */
+    .nav {
+        gap: 5px;
+    }
+
+    .nav-link {
+        padding: 6px 8px;
+        font-size: 12px;
+        min-width: 60px;
+    }
+
+    /* Títulos menores */
+    h1 { font-size: 20px; }
+    h2 { font-size: 18px; }
+    h3 { font-size: 16px; }
+
+    /* Cards compactos */
+    .card {
+        padding: 12px;
+    }
+
+    /* Botões compactos */
+    .btn {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+
+    /* Formulários compactos */
+    .form-input,
+    .form-select {
+        padding: 12px;
+    }
+
+    /* Estatísticas compactas */
+    .stat-value {
+        font-size: 24px;
+    }
+
+    .stat-label {
+        font-size: 11px;
+    }
+
+    /* Navegação teste ultra compacta */
+    .test-navigation {
+        padding: 8px;
+        gap: 8px;
+    }
+
+    .test-navigation .btn {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    /* Modal full screen em mobile pequeno */
+    .modal-content {
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        padding: 15px;
+        border: none;
+    }
+
+    /* Login compacto */
+    .login-box {
+        padding: 20px;
+        border-width: 1px;
+    }
+}
+
+/* Menu hamburguer para mobile */
+.mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: flex;
+    }
+}
+
+/* Overlay para sidebar mobile */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+}
+
+.sidebar-overlay.show {
+    display: block;
+}
+
+/* Tabela responsiva com stack em mobile */
+@media (max-width: 768px) {
+    .table-responsive-stack thead {
+        display: none;
+    }
+
+    .table-responsive-stack tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 2px solid var(--border-color);
+        padding: 10px;
+    }
+
+    .table-responsive-stack td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .table-responsive-stack td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .table-responsive-stack td:last-child {
+        border-bottom: none;
+    }
+}
+
+/* Melhorias de touch para mobile */
+@media (hover: none) and (pointer: coarse) {
+    /* Aumentar área de toque */
+    .nav-link,
+    .btn,
+    .alternative,
+    .question-item {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Remover efeitos hover em touch */
+    .alternative:hover,
+    .nav-link:hover,
+    .question-item:hover {
+        background-color: transparent;
+    }
+
+    /* Feedback visual em tap */
+    .alternative:active,
+    .btn:active,
+    .nav-link:active {
+        opacity: 0.7;
+    }
+}
+
+/* Landscape mobile - ajustes específicos */
+@media (max-width: 768px) and (orientation: landscape) {
+    .header {
+        padding: 8px 0;
+        margin-bottom: 10px;
+    }
+
+    .card {
+        padding: 10px;
+    }
+
+    .stat-value {
+        font-size: 24px;
     }
 }
 
