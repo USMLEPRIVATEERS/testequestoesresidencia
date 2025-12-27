@@ -32,6 +32,19 @@ Este script irá:
 
 **Depois de executar AMBOS os scripts, a criação de contas deve funcionar normalmente.**
 
+**Passo 3 (OPCIONAL)**: Nunca repetir questões já respondidas
+```sql
+-- Execute este arquivo se quiser que questões nunca se repitam:
+09-fix-questoes-nao-respondidas.sql
+```
+
+Este script irá:
+- ✅ Atualizar função `obter_questoes_nao_respondidas`
+- ✅ Remover questões já respondidas (mesmo de testes finalizados)
+- ✅ Garantir que você sempre faça questões novas
+
+**OBS**: Se você quiser refazer questões antigas, use o botão "Refazer Teste" em "Testes Anteriores".
+
 ---
 
 ## 📋 Ordem de Execução - Instalação Nova
@@ -79,6 +92,12 @@ Insere dados de exemplo para testes. Execute apenas se quiser dados de teste.
 05-migration-add-images.sql
 ```
 Adiciona suporte a imagens nas questões. Execute apenas se você criou o banco antes desta feature existir.
+
+### 8. Nunca Repetir Questões (OPCIONAL mas Recomendado)
+```sql
+09-fix-questoes-nao-respondidas.sql
+```
+**Recomendado!** Atualiza a função para nunca mostrar questões já respondidas. Garante que você sempre faça questões novas em "Novo Teste".
 
 ---
 
