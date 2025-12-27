@@ -4,10 +4,11 @@ Este diretório contém os scripts SQL necessários para configurar o banco de d
 
 ## ⚠️ IMPORTANTE - Se você já executou os scripts anteriormente
 
-Se você já executou os scripts SQL originais e está encontrando erros de autenticação, **EXECUTE PRIMEIRO O SCRIPT DE CORREÇÃO**:
+Se você já executou os scripts SQL originais e está encontrando erros de autenticação, **EXECUTE OS SCRIPTS DE CORREÇÃO NA ORDEM**:
 
 ### Correção Urgente (se já tem o banco configurado):
 
+**Passo 1**: Corrigir estrutura da tabela
 ```sql
 -- Execute ESTE arquivo primeiro para corrigir a estrutura:
 07-fix-usuarios-table.sql
@@ -18,7 +19,18 @@ Este script irá:
 - ✅ Adicionar as colunas `whatsapp` e `instagram`
 - ✅ Adicionar validações e índices necessários
 
-**Depois de executar este script, a criação de contas deve funcionar normalmente.**
+**Passo 2**: Corrigir políticas RLS
+```sql
+-- Execute ESTE arquivo em seguida para permitir INSERT:
+08-fix-rls-usuarios-insert.sql
+```
+
+Este script irá:
+- ✅ Adicionar política de INSERT (permite criar conta durante signup)
+- ✅ Atualizar política de SELECT (permite ver ranking de outros usuários)
+- ✅ Verificar que todas as políticas foram criadas corretamente
+
+**Depois de executar AMBOS os scripts, a criação de contas deve funcionar normalmente.**
 
 ---
 
@@ -116,17 +128,25 @@ Após executar os scripts, verifique:
 
 ## 🆘 Troubleshooting
 
-### Erro: "Database error saving new user"
+### Erro: "new row violates row-level security policy for table usuarios" (403)
+**Causa**: As políticas RLS não permitem INSERT na tabela usuarios
+**Solução**: Execute o script `08-fix-rls-usuarios-insert.sql`
+
+### Erro: "Database error saving new user" (500)
+**Causa**: Coluna `senha_hash NOT NULL` incompatível com Supabase Auth
 **Solução**: Execute o script `07-fix-usuarios-table.sql`
 
 ### Erro: "relation usuarios does not exist"
-**Solução**: Execute `01-create-tables.sql` primeiro, depois `07-fix-usuarios-table.sql`
+**Causa**: Tabela ainda não foi criada
+**Solução**: Execute `01-create-tables.sql` primeiro, depois `07-fix-usuarios-table.sql` e `08-fix-rls-usuarios-insert.sql`
 
 ### Erro: "column whatsapp does not exist"
+**Causa**: Migração de campos sociais não foi executada
 **Solução**: Execute o script `07-fix-usuarios-table.sql`
 
 ### Erro: "duplicate key value violates unique constraint"
-**Solução**: O email já está cadastrado. Tente outro email ou delete o usuário existente.
+**Causa**: Email já está cadastrado no banco
+**Solução**: Use outro email ou delete o usuário existente via SQL Editor
 
 ---
 
