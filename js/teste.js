@@ -166,7 +166,7 @@ function renderizarListaQuestoes() {
 function renderizarQuestao() {
     const questao = testeData.questoes[questaoAtualIndex];
     console.log('🟠 [DEBUG] Renderizando questão:', questao);
-    console.log('🟠 [DEBUG] ID da questão:', questao?.id);
+    console.log('🟠 [DEBUG] ID da questão:', questao?.questao_id);
 
     respostaVisivel = false;
 
@@ -323,7 +323,7 @@ async function verResposta() {
 
     const questao = testeData.questoes[questaoAtualIndex];
     console.log('🔴 [DEBUG] Ver Resposta - Questão atual:', questao);
-    console.log('🔴 [DEBUG] Ver Resposta - ID da questão:', questao?.id);
+    console.log('🔴 [DEBUG] Ver Resposta - ID da questão:', questao?.questao_id);
     console.log('🔴 [DEBUG] Ver Resposta - questaoAtualIndex:', questaoAtualIndex);
 
     const respostaUsuarioAtual = respostasUsuario[questao.questao_id]?.resposta;
@@ -395,7 +395,7 @@ async function salvarResposta(questaoId, resposta) {
 
         const session = await Utils.checkAuth();
         const userId = session.user.id;
-        const questao = testeData.questoes.find(q => q.id === questaoId);
+        const questao = testeData.questoes.find(q => q.questao_id === questaoId);
 
         console.log('🔵 [DEBUG] Dados do usuário e questão:', { userId, questao: questao?.questao_texto?.substring(0, 50) });
 
