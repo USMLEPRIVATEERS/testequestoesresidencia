@@ -238,3 +238,198 @@ async function atualizarGrafico() {
         Utils.showNotification('Erro ao carregar gráfico de desempenho', 'error');
     }
 }
+
+// ============================================
+// EDIÇÃO DE PERFIL
+// ============================================
+
+// Abrir modal de edição de perfil
+async function abrirModalEditarPerfil() {
+    try {
+        const session = await Utils.checkAuth();
+        const userId = session.user.id;
+
+        // Buscar dados atuais do usuário
+        const { data, error } = await supabaseClient
+            .from('usuarios')
+            .select('nome, email, whatsapp, instagram')
+            .eq('id', userId)
+            .single();
+
+        if (error) throw error;
+
+        console.log('🔵 [EDIT] Dados atuais:', data);
+
+        // Preencher formulário
+        document.getElementById('editNome').value = data.nome || '';
+        document.getElementById('editEmail').value = data.email || '';
+        document.getElementById('editInstagram').value = data.instagram || '';
+
+        // Parsear WhatsApp
+        if (data.whatsapp) {
+            const whatsapp = data.whatsapp;
+            // Formato: +5511999999999
+            const countryCodeMatch = whatsapp.match(/^\+\d{1,3}/);
+            if (countryCodeMatch) {
+                const countryCode = countryCodeMatch[0];
+                document.getElementById('editWhatsappCountryCode').value = countryCode;
+
+                const restNumber = whatsapp.substring(countryCode.length);
+
+                // Se for Brasil (+55), separar DDD e número
+                if (countryCode === '+55' && restNumber.length >= 10) {
+                    document.getElementById('editWhatsappDDD').value = restNumber.substring(0, 2);
+                    document.getElementById('editWhatsappNumber').value = restNumber.substring(2);
+                } else {
+                    // Outros países: colocar tudo no número
+                    document.getElementById('editWhatsappDDD').value = '';
+                    document.getElementById('editWhatsappNumber').value = restNumber;
+                }
+            }
+        }
+
+        updateEditWhatsappFields();
+
+        // Mostrar modal
+        document.getElementById('modalEditarPerfil').classList.add('active');
+
+    } catch (error) {
+        console.error('Erro ao carregar dados do perfil:', error);
+        Utils.showNotification('Erro ao carregar dados do perfil.', 'error');
+    }
+}
+
+// Fechar modal de edição
+function fecharModalEditarPerfil() {
+    document.getElementById('modalEditarPerfil').classList.remove('active');
+    document.getElementById('formEditarPerfil').reset();
+}
+
+// Atualizar campos de WhatsApp no modal de edição
+function updateEditWhatsappFields() {
+    const select = document.getElementById('editWhatsappCountryCode');
+    const option = select.options[select.selectedIndex];
+    const dddLength = option.getAttribute('data-ddd-length');
+
+    const dddInput = document.getElementById('editWhatsappDDD');
+
+    if (dddLength === '0') {
+        // Países sem DDD
+        dddInput.style.display = 'none';
+        dddInput.required = false;
+        dddInput.value = '';
+    } else {
+        // Países com DDD
+        dddInput.style.display = 'block';
+        dddInput.required = true;
+        dddInput.maxLength = dddLength;
+    }
+}
+
+// Salvar dados do perfil
+async function salvarDadosPerfil(event) {
+    event.preventDefault();
+
+    const nome = document.getElementById('editNome').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    const instagram = document.getElementById('editInstagram').value.trim();
+
+    // Construir WhatsApp
+    const countryCode = document.getElementById('editWhatsappCountryCode').value;
+    const ddd = document.getElementById('editWhatsappDDD').value.trim();
+    const number = document.getElementById('editWhatsappNumber').value.trim();
+
+    const whatsapp = ddd ? `${countryCode}${ddd}${number}` : `${countryCode}${number}`;
+
+    // Validar WhatsApp
+    if (!whatsapp || whatsapp.length < 10) {
+        Utils.showNotification('Preencha o WhatsApp corretamente!', 'error');
+        return;
+    }
+
+    try {
+        console.log('🔵 [EDIT] Salvando dados:', { nome, email, whatsapp, instagram });
+
+        const session = await Utils.checkAuth();
+        const userId = session.user.id;
+
+        // Preparar dados para atualização
+        const dadosAtualizacao = {
+            nome: nome,
+            whatsapp: whatsapp,
+            instagram: instagram || null
+        };
+
+        console.log('🔵 [EDIT] Dados a serem salvos:', dadosAtualizacao);
+
+        // Atualizar na tabela usuarios
+        const { data, error } = await supabaseClient
+            .from('usuarios')
+            .update(dadosAtualizacao)
+            .eq('id', userId)
+            .select();
+
+        if (error) {
+            console.error('❌ [EDIT] Erro ao atualizar tabela usuarios:', error);
+            throw error;
+        }
+
+        console.log('✅ [EDIT] Dados atualizados na tabela usuarios:', data);
+
+        // Se o email mudou, atualizar no Supabase Auth também
+        if (email !== currentUser.email) {
+            console.log('🔵 [EDIT] Email mudou, atualizando no Auth...');
+
+            const { error: authError } = await supabaseClient.auth.updateUser({
+                email: email
+            });
+
+            if (authError) {
+                console.error('❌ [EDIT] Erro ao atualizar email no Auth:', authError);
+                Utils.showNotification(
+                    'Dados atualizados, mas erro ao mudar email. Você receberá um email de confirmação.',
+                    'warning'
+                );
+            } else {
+                console.log('✅ [EDIT] Email atualizado no Auth');
+                Utils.showNotification(
+                    'Dados atualizados! Verifique seu email para confirmar a mudança de email.',
+                    'success'
+                );
+            }
+
+            // Atualizar email na tabela usuarios também
+            await supabaseClient
+                .from('usuarios')
+                .update({ email: email })
+                .eq('id', userId);
+        } else {
+            Utils.showNotification('Dados atualizados com sucesso!', 'success');
+        }
+
+        // Atualizar dados locais
+        currentUser.nome = nome;
+        currentUser.email = email;
+        currentUser.whatsapp = whatsapp;
+        currentUser.instagram = instagram;
+
+        // Atualizar mensagem de boas-vindas
+        document.getElementById('welcomeMessage').textContent = `Bem-vindo, ${nome}!`;
+
+        // Fechar modal
+        fecharModalEditarPerfil();
+
+    } catch (error) {
+        console.error('❌ [EDIT] Erro ao salvar dados:', error);
+        console.error('❌ [EDIT] Detalhes:', JSON.stringify(error, null, 2));
+        Utils.showNotification('Erro ao salvar dados: ' + error.message, 'error');
+    }
+}
+
+// Fechar modal ao clicar fora
+window.addEventListener('click', (event) => {
+    const modal = document.getElementById('modalEditarPerfil');
+    if (modal && event.target === modal) {
+        fecharModalEditarPerfil();
+    }
+});
