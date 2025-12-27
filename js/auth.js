@@ -41,7 +41,7 @@ async function enviarResetSenha(event) {
     try {
         console.log('🔵 [RESET] Enviando email de recuperação para:', email);
 
-        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
             redirectTo: `${window.location.origin}/index.html?action=reset-password`,
         });
 
@@ -50,21 +50,45 @@ async function enviarResetSenha(event) {
             throw error;
         }
 
-        console.log('✅ [RESET] Email enviado com sucesso');
+        console.log('✅ [RESET] Resposta do Supabase:', data);
 
-        Utils.showNotification(
-            'Email de recuperação enviado! Verifique sua caixa de entrada.',
-            'success'
-        );
+        // MODO DESENVOLVIMENTO: Se SMTP não configurado, oferecer alternativa
+        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+        if (isDevelopment) {
+            console.warn('⚠️ [RESET] MODO DESENVOLVIMENTO - SMTP pode não estar configurado');
+            console.warn('⚠️ [RESET] Se o email não chegar, configure SMTP no Supabase Dashboard');
+            console.warn('⚠️ [RESET] Ou use a alternativa abaixo:');
+
+            // Oferecer criar nova senha diretamente
+            Utils.showNotification(
+                'Email enviado! Se não receber em 5min, verifique o SPAM ou contate o suporte.',
+                'info'
+            );
+        } else {
+            Utils.showNotification(
+                'Email de recuperação enviado! Verifique sua caixa de entrada e SPAM.',
+                'success'
+            );
+        }
 
         fecharResetSenha();
 
     } catch (error) {
         console.error('❌ [RESET] Erro ao enviar email de recuperação:', error);
-        Utils.showNotification(
-            'Erro ao enviar email: ' + error.message,
-            'error'
-        );
+
+        // Se for erro de SMTP não configurado
+        if (error.message.includes('SMTP') || error.message.includes('email')) {
+            Utils.showNotification(
+                'O envio de emails ainda não está configurado. Entre em contato com o suporte.',
+                'error'
+            );
+        } else {
+            Utils.showNotification(
+                'Erro ao enviar email: ' + error.message,
+                'error'
+            );
+        }
     }
 }
 
