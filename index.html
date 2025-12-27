@@ -218,6 +218,21 @@
             <p>Prepare-se para a residência médica com milhares de questões comentadas. Comece grátis ou escolha um plano que se encaixa nas suas necessidades.</p>
         </div>
 
+        <!-- Plano Atual (quando logado) -->
+        <div id="planoAtualSection" style="display: none; background: var(--white); border: 3px solid var(--black); border-radius: var(--radius-xl); padding: 30px; margin-bottom: 40px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 10px;">Seu Plano Atual</h2>
+                    <div id="planoAtualInfo" style="font-size: 16px; color: var(--gray-700);">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+                <div id="planoAtualActions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <!-- Botões preenchidos via JavaScript -->
+                </div>
+            </div>
+        </div>
+
         <!-- Planos -->
         <div class="plans-grid">
             <!-- Plano FREE -->
@@ -390,17 +405,150 @@
                 // Buscar plano do usuário
                 const { data, error } = await supabaseClient
                     .from('usuarios')
-                    .select('plano, questoes_respondidas_hoje, data_fim_plano')
+                    .select('plano, questoes_respondidas_hoje, data_fim_plano, nome')
                     .eq('id', userId)
                     .single();
 
                 if (error) throw error;
 
-                // Mostrar plano atual (opcional - pode adicionar badge "Plano Atual" no card)
-                console.log('Plano atual:', data.plano);
+                const planoAtual = data.plano || 'free';
+                console.log('Plano atual:', planoAtual);
+
+                // Mostrar seção de plano atual
+                const planoAtualSection = document.getElementById('planoAtualSection');
+                const planoAtualInfo = document.getElementById('planoAtualInfo');
+                const planoAtualActions = document.getElementById('planoAtualActions');
+
+                planoAtualSection.style.display = 'block';
+
+                // Informações do plano
+                let infoHTML = '';
+                let questoesRestantes = 10 - (data.questoes_respondidas_hoje || 0);
+
+                if (planoAtual === 'free') {
+                    infoHTML = `
+                        <p style="margin-bottom: 8px;"><strong>Plano:</strong> <span style="font-size: 18px; font-weight: 700;">FREE</span></p>
+                        <p style="margin-bottom: 8px;"><strong>Questões hoje:</strong> ${questoesRestantes}/10 disponíveis</p>
+                        <p style="color: var(--gray-600); font-size: 14px;">Faça upgrade para ter acesso ilimitado!</p>
+                    `;
+                } else {
+                    const planoNomes = {
+                        'mensal': 'MENSAL',
+                        'semestral': 'SEMESTRAL',
+                        'anual': 'ANUAL'
+                    };
+                    const planoNome = planoNomes[planoAtual] || planoAtual.toUpperCase();
+
+                    let dataFimTexto = 'Ativo';
+                    if (data.data_fim_plano) {
+                        const dataFim = new Date(data.data_fim_plano);
+                        const hoje = new Date();
+                        const diasRestantes = Math.ceil((dataFim - hoje) / (1000 * 60 * 60 * 24));
+
+                        if (diasRestantes > 0) {
+                            dataFimTexto = `Válido por ${diasRestantes} dias (até ${dataFim.toLocaleDateString('pt-BR')})`;
+                        } else {
+                            dataFimTexto = 'Expirado';
+                        }
+                    }
+
+                    infoHTML = `
+                        <p style="margin-bottom: 8px;"><strong>Plano:</strong> <span style="font-size: 18px; font-weight: 700; color: var(--black);">${planoNome}</span></p>
+                        <p style="margin-bottom: 8px;"><strong>Status:</strong> ${dataFimTexto}</p>
+                        <p style="color: var(--success-color); font-weight: 600;">✓ Questões ilimitadas</p>
+                    `;
+                }
+
+                planoAtualInfo.innerHTML = infoHTML;
+
+                // Botões de ação
+                let actionsHTML = '';
+                if (planoAtual === 'free') {
+                    actionsHTML = `
+                        <a href="dashboard.html" class="btn">Ir para Dashboard</a>
+                    `;
+                } else {
+                    actionsHTML = `
+                        <a href="dashboard.html" class="btn btn-primary">Ir para Dashboard</a>
+                        <button class="btn" onclick="mostrarOpcoesPlano()">Gerenciar Plano</button>
+                    `;
+                }
+                planoAtualActions.innerHTML = actionsHTML;
+
+                // Destacar o card do plano atual
+                destacarPlanoAtual(planoAtual);
+
+                // Atualizar hero para usuário logado
+                const hero = document.querySelector('.hero');
+                if (hero && !window.location.search.includes('new_user=true')) {
+                    hero.querySelector('h1').textContent = `Olá, ${data.nome || 'Estudante'}!`;
+                    if (planoAtual === 'free') {
+                        hero.querySelector('p').textContent = 'Você está no plano FREE com 10 questões por dia. Faça upgrade para estudar sem limites!';
+                    } else {
+                        hero.querySelector('p').textContent = 'Confira abaixo as opções de planos disponíveis.';
+                    }
+                }
+
             } catch (error) {
                 console.error('Erro ao carregar plano:', error);
             }
+        }
+
+        // Destacar plano atual
+        function destacarPlanoAtual(planoAtual) {
+            // Remover destaque de todos
+            document.querySelectorAll('.plan-card').forEach(card => {
+                card.style.position = 'relative';
+                const badge = card.querySelector('.plano-atual-badge');
+                if (badge) badge.remove();
+
+                // Atualizar botão
+                const btn = card.querySelector('.plan-cta');
+                if (btn) {
+                    const planoType = card.classList.contains('free') ? 'free' :
+                                     card.querySelector('.plan-name').textContent.toLowerCase();
+
+                    if (planoType === planoAtual ||
+                        (planoType === 'free' && planoAtual === 'free') ||
+                        (planoType === 'mensal' && planoAtual === 'mensal') ||
+                        (planoType === 'semestral' && planoAtual === 'semestral') ||
+                        (planoType === 'anual' && planoAtual === 'anual')) {
+
+                        btn.textContent = 'Plano Atual';
+                        btn.disabled = true;
+                        btn.style.opacity = '0.6';
+                        btn.style.cursor = 'not-allowed';
+
+                        // Adicionar badge
+                        const badge = document.createElement('div');
+                        badge.className = 'plano-atual-badge';
+                        badge.textContent = '✓ ATIVO';
+                        badge.style.cssText = `
+                            position: absolute;
+                            top: 15px;
+                            left: 15px;
+                            background: var(--success-color);
+                            color: white;
+                            padding: 6px 12px;
+                            border-radius: var(--radius-full);
+                            font-size: 12px;
+                            font-weight: 700;
+                            letter-spacing: 0.5px;
+                            z-index: 10;
+                        `;
+                        card.insertBefore(badge, card.firstChild);
+
+                        // Destacar card
+                        card.style.borderColor = 'var(--success-color)';
+                        card.style.borderWidth = '3px';
+                    }
+                }
+            });
+        }
+
+        // Mostrar opções de gerenciamento de plano
+        function mostrarOpcoesPlano() {
+            Utils.showNotification('Opções de gerenciamento de plano estarão disponíveis em breve!', 'info');
         }
 
         // Selecionar plano

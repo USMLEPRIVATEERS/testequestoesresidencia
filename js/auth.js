@@ -183,6 +183,20 @@ async function handleRegister(event) {
     try {
         console.log('🔵 [SIGNUP] Iniciando cadastro com dados:', { name, email, whatsapp });
 
+        // Verificar se usuário já existe antes de tentar criar
+        const { data: existingUser } = await supabaseClient
+            .from('usuarios')
+            .select('id, email')
+            .eq('email', email)
+            .single();
+
+        if (existingUser) {
+            console.log('⚠️ [SIGNUP] Usuário já existe:', email);
+            Utils.showNotification('Este email já está cadastrado. Faça login.', 'error');
+            toggleForms(); // Volta para tela de login
+            return;
+        }
+
         // Criar usuário no Supabase Auth
         const { data: authData, error: authError } = await supabaseClient.auth.signUp({
             email: email,
@@ -190,8 +204,19 @@ async function handleRegister(event) {
         });
 
         if (authError) {
+            // Se erro for "User already registered", significa que existe no Auth mas não na tabela
+            if (authError.message.includes('already registered') || authError.message.includes('User already registered')) {
+                console.warn('⚠️ [SIGNUP] Usuário existe no Auth mas não na tabela usuarios');
+                Utils.showNotification('Este email já está cadastrado. Faça login.', 'error');
+                toggleForms();
+                return;
+            }
             console.error('❌ [SIGNUP] Erro no Supabase Auth:', authError);
             throw authError;
+        }
+
+        if (!authData || !authData.user) {
+            throw new Error('Erro ao criar usuário: dados inválidos');
         }
 
         console.log('✅ [SIGNUP] Usuário criado no Auth:', authData.user.id);
@@ -214,6 +239,18 @@ async function handleRegister(event) {
 
         if (dbError) {
             console.error('❌ [SIGNUP] Erro ao inserir na tabela usuarios:', dbError);
+
+            // Se erro for duplicate key, usuário já existe
+            if (dbError.code === '23505') {
+                console.warn('⚠️ [SIGNUP] Usuário já existe na tabela (duplicate key)');
+                // Fazer login automaticamente já que o usuário foi criado
+                Utils.showNotification('Conta já criada! Redirecionando...', 'info');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+                return;
+            }
+
             console.error('❌ [SIGNUP] Detalhes do erro:', JSON.stringify(dbError, null, 2));
             throw dbError;
         }
@@ -224,12 +261,21 @@ async function handleRegister(event) {
 
         // Redirecionar para página de planos como novo usuário
         setTimeout(() => {
-            window.location.href = 'planos.html?new_user=true';
+            window.location.href = 'index.html?new_user=true';
         }, 1000);
 
     } catch (error) {
         console.error('❌ [SIGNUP] Erro geral no registro:', error);
         console.error('❌ [SIGNUP] Stack trace:', error.stack);
-        Utils.showNotification('Erro ao criar conta: ' + error.message, 'error');
+
+        // Melhorar mensagem de erro para o usuário
+        let errorMessage = 'Erro ao criar conta';
+        if (error.message.includes('already registered')) {
+            errorMessage = 'Este email já está cadastrado. Faça login.';
+        } else if (error.message) {
+            errorMessage = 'Erro ao criar conta: ' + error.message;
+        }
+
+        Utils.showNotification(errorMessage, 'error');
     }
 }
