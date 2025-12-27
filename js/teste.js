@@ -372,34 +372,51 @@ async function verResposta() {
 // Salvar resposta no banco
 async function salvarResposta(questaoId, resposta) {
     try {
+        console.log('🔵 [DEBUG] Iniciando salvamento de resposta:', { questaoId, resposta });
+
         const session = await Utils.checkAuth();
         const userId = session.user.id;
         const questao = testeData.questoes.find(q => q.id === questaoId);
 
+        console.log('🔵 [DEBUG] Dados do usuário e questão:', { userId, questao: questao?.questao_texto?.substring(0, 50) });
+
         const correto = resposta === questao.gabarito;
         const status = correto ? 'C' : 'I';
 
-        const { error } = await supabaseClient
-            .from('respostas_usuarios')
-            .insert([
-                {
-                    usuario_id: userId,
-                    teste_id: testeData.testeId,
-                    questao_id: questaoId,
-                    resposta_usuario: resposta,
-                    status_resposta: status,
-                    tempo_resposta_segundos: Math.floor((Date.now() - tempoInicio) / 1000)
-                }
-            ]);
+        console.log('🔵 [DEBUG] Status calculado:', { resposta, gabarito: questao.gabarito, correto, status });
 
-        if (error) throw error;
+        const dadosInsert = {
+            usuario_id: userId,
+            teste_id: testeData.testeId,
+            questao_id: questaoId,
+            resposta_usuario: resposta,
+            status_resposta: status,
+            tempo_resposta_segundos: Math.floor((Date.now() - tempoInicio) / 1000)
+        };
+
+        console.log('🔵 [DEBUG] Dados a serem inseridos:', dadosInsert);
+
+        const { data, error } = await supabaseClient
+            .from('respostas_usuarios')
+            .insert([dadosInsert])
+            .select();
+
+        if (error) {
+            console.error('❌ [DEBUG] Erro do Supabase:', error);
+            throw error;
+        }
+
+        console.log('✅ [DEBUG] Resposta salva com sucesso!', data);
 
         // Atualizar cache local
         respostasUsuario[questaoId].status = status;
 
+        Utils.showNotification(correto ? '✓ Correto!' : '✗ Incorreto', correto ? 'success' : 'info');
+
     } catch (error) {
-        console.error('Erro ao salvar resposta:', error);
-        Utils.showNotification('Erro ao salvar resposta', 'error');
+        console.error('❌ [DEBUG] Erro ao salvar resposta:', error);
+        console.error('❌ [DEBUG] Detalhes do erro:', JSON.stringify(error, null, 2));
+        Utils.showNotification('Erro ao salvar resposta: ' + (error.message || 'Desconhecido'), 'error');
     }
 }
 
@@ -555,9 +572,14 @@ async function pausarTeste() {
 
 // Finalizar teste
 async function finalizarTeste() {
+    console.log('🟢 [DEBUG] Finalizando teste. Modo:', testeData.modo);
+    console.log('🟢 [DEBUG] Respostas usuário:', respostasUsuario);
+
     // Verificar se todas as questões foram respondidas (modo simulado)
     if (testeData.modo === 'simulado') {
         const questoesRespondidas = Object.keys(respostasUsuario).length;
+        console.log('🟢 [DEBUG] Questões respondidas:', questoesRespondidas, 'de', testeData.questoes.length);
+
         if (questoesRespondidas < testeData.questoes.length) {
             const confirmacao = await Utils.confirm(
                 `Você respondeu ${questoesRespondidas} de ${testeData.questoes.length} questões. Deseja finalizar mesmo assim?`
@@ -566,11 +588,20 @@ async function finalizarTeste() {
         }
 
         // Salvar todas as respostas pendentes
+        console.log('🟢 [DEBUG] Salvando respostas pendentes no modo simulado...');
+        let respostasSalvas = 0;
         for (const questao of testeData.questoes) {
-            if (respostasUsuario[questao.id]?.resposta && !respostasUsuario[questao.id]?.status) {
+            const temResposta = respostasUsuario[questao.id]?.resposta;
+            const jaTemStatus = respostasUsuario[questao.id]?.status;
+            console.log(`🟢 [DEBUG] Questão ${questao.id}: resposta=${temResposta}, status=${jaTemStatus}`);
+
+            if (temResposta && !jaTemStatus) {
+                console.log('🟢 [DEBUG] Salvando resposta pendente para questão:', questao.id);
                 await salvarResposta(questao.id, respostasUsuario[questao.id].resposta);
+                respostasSalvas++;
             }
         }
+        console.log(`🟢 [DEBUG] Total de respostas salvas no modo simulado: ${respostasSalvas}`);
     }
 
     try {
