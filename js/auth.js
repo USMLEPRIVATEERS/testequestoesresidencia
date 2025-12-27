@@ -252,10 +252,11 @@ async function salvarPerfilInicial(event) {
 
         console.log('🔵 [COMPLETAR PERFIL] Salvando na tabela usuarios:', dadosUsuario);
 
-        // Inserir na tabela usuarios (agora com usuário autenticado, RLS vai permitir)
-        const { data: insertData, error: dbError } = await supabaseClient
+        // UPSERT na tabela usuarios (insere se não existir, atualiza se já existir)
+        // Isso resolve o caso de triggers automáticos ou tentativas anteriores
+        const { data: upsertData, error: dbError } = await supabaseClient
             .from('usuarios')
-            .insert([dadosUsuario])
+            .upsert([dadosUsuario], { onConflict: 'id' })
             .select();
 
         if (dbError) {
@@ -263,7 +264,7 @@ async function salvarPerfilInicial(event) {
             throw new Error('Erro ao salvar perfil: ' + dbError.message);
         }
 
-        console.log('✅ [COMPLETAR PERFIL] Perfil salvo com sucesso:', insertData);
+        console.log('✅ [COMPLETAR PERFIL] Perfil salvo com sucesso:', upsertData);
 
         Utils.showNotification('Perfil completado! Redirecionando...', 'success');
 
