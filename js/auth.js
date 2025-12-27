@@ -197,10 +197,16 @@ async function handleRegister(event) {
             return;
         }
 
-        // Criar usuário no Supabase Auth
+        // Criar usuário no Supabase Auth com metadata
         const { data: authData, error: authError } = await supabaseClient.auth.signUp({
             email: email,
             password: password,
+            options: {
+                data: {
+                    name: name,
+                    whatsapp: whatsapp
+                }
+            }
         });
 
         if (authError) {
@@ -221,41 +227,57 @@ async function handleRegister(event) {
 
         console.log('✅ [SIGNUP] Usuário criado no Auth:', authData.user.id);
 
-        // Criar registro na tabela usuarios
-        const dadosUsuario = {
-            id: authData.user.id,
-            email: email,
-            nome: name,
-            whatsapp: whatsapp,
-            provas_selecionadas: [],
-        };
+        // Aguardar um momento para o trigger do banco criar o registro
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-        console.log('🔵 [SIGNUP] Inserindo na tabela usuarios:', dadosUsuario);
-
-        const { data: insertData, error: dbError } = await supabaseClient
+        // Verificar se registro foi criado pelo trigger, senão criar manualmente (fallback)
+        let { data: usuarioExistente } = await supabaseClient
             .from('usuarios')
-            .insert([dadosUsuario])
-            .select();
+            .select('id')
+            .eq('id', authData.user.id)
+            .single();
 
-        if (dbError) {
-            console.error('❌ [SIGNUP] Erro ao inserir na tabela usuarios:', dbError);
+        if (!usuarioExistente) {
+            console.log('⚠️ [SIGNUP] Trigger não criou registro, criando manualmente (fallback)');
 
-            // Se erro for duplicate key, usuário já existe
-            if (dbError.code === '23505') {
-                console.warn('⚠️ [SIGNUP] Usuário já existe na tabela (duplicate key)');
-                // Fazer login automaticamente já que o usuário foi criado
-                Utils.showNotification('Conta já criada! Redirecionando...', 'info');
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1000);
-                return;
+            // Criar registro na tabela usuarios manualmente
+            const dadosUsuario = {
+                id: authData.user.id,
+                email: email,
+                nome: name,
+                whatsapp: whatsapp,
+                provas_selecionadas: [],
+            };
+
+            console.log('🔵 [SIGNUP] Inserindo na tabela usuarios:', dadosUsuario);
+
+            const { data: insertData, error: dbError } = await supabaseClient
+                .from('usuarios')
+                .insert([dadosUsuario])
+                .select();
+
+            if (dbError) {
+                console.error('❌ [SIGNUP] Erro ao inserir na tabela usuarios:', dbError);
+
+                // Se erro for duplicate key, o trigger criou entre nossa verificação e insert
+                if (dbError.code === '23505') {
+                    console.log('✅ [SIGNUP] Registro já foi criado pelo trigger');
+                } else {
+                    console.error('❌ [SIGNUP] Detalhes do erro:', JSON.stringify(dbError, null, 2));
+                    throw dbError;
+                }
+            } else {
+                console.log('✅ [SIGNUP] Dados salvos na tabela usuarios (fallback):', insertData);
             }
+        } else {
+            console.log('✅ [SIGNUP] Registro criado automaticamente pelo trigger');
 
-            console.error('❌ [SIGNUP] Detalhes do erro:', JSON.stringify(dbError, null, 2));
-            throw dbError;
+            // Atualizar nome e whatsapp já que o trigger pode não ter esses dados
+            await supabaseClient
+                .from('usuarios')
+                .update({ nome: name, whatsapp: whatsapp })
+                .eq('id', authData.user.id);
         }
-
-        console.log('✅ [SIGNUP] Dados salvos na tabela usuarios:', insertData);
 
         Utils.showNotification('Conta criada com sucesso! Escolha seu plano.', 'success');
 
