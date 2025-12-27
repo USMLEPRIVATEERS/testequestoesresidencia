@@ -254,7 +254,30 @@
                             placeholder="Digite a senha novamente"
                         >
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">Criar Conta</button>
+
+                    <!-- Área de status do cadastro -->
+                    <div id="signupStatus" class="hide" style="padding: 15px; margin-bottom: 20px; border-radius: 8px; border: 2px solid; text-align: center; font-weight: 600;">
+                        <!-- Mensagem preenchida via JavaScript -->
+                    </div>
+
+                    <!-- Botão 1: Confirmar Dados -->
+                    <button
+                        type="button"
+                        id="btnConfirmarDados"
+                        class="btn btn-primary btn-block"
+                        onclick="confirmarDados(event)">
+                        ✓ Confirmar Dados
+                    </button>
+
+                    <!-- Botão 2: Criar Conta (inicialmente escondido) -->
+                    <button
+                        type="button"
+                        id="btnCriarConta"
+                        class="btn btn-primary btn-block hide"
+                        onclick="criarContaAuth(event)">
+                        🚀 Criar Conta e Entrar
+                    </button>
+
                     <div class="login-toggle">
                         Já tem conta?
                         <a onclick="toggleForms()">Faça login aqui</a>

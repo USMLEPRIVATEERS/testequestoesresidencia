@@ -146,8 +146,21 @@ async function handleLogin(event) {
     }
 }
 
-// Manipular registro
-async function handleRegister(event) {
+// ============================================
+// NOVO SISTEMA DE SIGNUP EM DUAS ETAPAS
+// ============================================
+
+// Variável global para guardar dados temporários do signup
+let signupTempData = {
+    tempUserId: null,
+    email: null,
+    password: null,
+    name: null,
+    whatsapp: null
+};
+
+// ETAPA 1: Confirmar Dados - Salvar na tabela usuarios
+async function confirmarDados(event) {
     event.preventDefault();
 
     const name = document.getElementById('registerName').value;
@@ -181,24 +194,34 @@ async function handleRegister(event) {
     }
 
     try {
-        console.log('🔵 [SIGNUP] Iniciando cadastro com dados:', { name, email, whatsapp });
+        console.log('🔵 [SIGNUP ETAPA 1] Verificando dados:', { name, email, whatsapp });
+
+        // Desabilitar botão e mostrar loading
+        const btnConfirmar = document.getElementById('btnConfirmarDados');
+        btnConfirmar.disabled = true;
+        btnConfirmar.textContent = 'Verificando...';
 
         // Verificar se usuário já existe na tabela
-        const { data: existingUser } = await supabaseClient
+        const { data: existingUser, error: checkError } = await supabaseClient
             .from('usuarios')
             .select('id, email')
             .eq('email', email)
-            .single();
+            .maybeSingle();
+
+        if (checkError && checkError.code !== 'PGRST116') {
+            // PGRST116 = não encontrado, que é OK
+            throw new Error('Erro ao verificar email: ' + checkError.message);
+        }
 
         if (existingUser) {
-            console.log('⚠️ [SIGNUP] Usuário já existe:', email);
-            Utils.showNotification('Este email já está cadastrado. Faça login.', 'error');
-            toggleForms();
+            console.log('⚠️ [SIGNUP ETAPA 1] Email já existe na tabela:', email);
+            mostrarStatus('error', '❌ Este email já está cadastrado. Faça login.');
+            btnConfirmar.disabled = false;
+            btnConfirmar.textContent = '✓ Confirmar Dados';
             return;
         }
 
-        // PASSO 1: Criar na tabela usuarios PRIMEIRO
-        // Gerar um ID temporário único para o usuário
+        // Gerar ID temporário único
         const tempUserId = crypto.randomUUID();
 
         const dadosUsuario = {
@@ -211,51 +234,106 @@ async function handleRegister(event) {
             questoes_respondidas_hoje: 0
         };
 
-        console.log('🔵 [SIGNUP] PASSO 1: Inserindo na tabela usuarios PRIMEIRO:', dadosUsuario);
+        console.log('🔵 [SIGNUP ETAPA 1] Salvando na tabela usuarios:', dadosUsuario);
 
+        // Inserir na tabela usuarios
         const { data: insertData, error: dbError } = await supabaseClient
             .from('usuarios')
             .insert([dadosUsuario])
             .select();
 
         if (dbError) {
-            console.error('❌ [SIGNUP] Erro ao inserir na tabela usuarios:', dbError);
+            console.error('❌ [SIGNUP ETAPA 1] Erro ao inserir:', dbError);
             throw new Error('Erro ao salvar dados: ' + dbError.message);
         }
 
-        console.log('✅ [SIGNUP] Dados salvos na tabela usuarios:', insertData);
+        console.log('✅ [SIGNUP ETAPA 1] Dados salvos com sucesso:', insertData);
 
-        // Aguardar um momento
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Guardar dados temporários
+        signupTempData = {
+            tempUserId,
+            email,
+            password,
+            name,
+            whatsapp
+        };
 
-        // PASSO 2: Criar no Auth DEPOIS
-        console.log('🔵 [SIGNUP] PASSO 2: Criando usuário no Auth...');
+        // Mostrar mensagem de sucesso
+        mostrarStatus('success', '✅ Dados confirmados! Agora clique em "Criar Conta e Entrar" para finalizar.');
 
+        // Esconder botão Confirmar Dados e mostrar botão Criar Conta
+        btnConfirmar.classList.add('hide');
+        document.getElementById('btnCriarConta').classList.remove('hide');
+
+        // Desabilitar inputs do formulário para evitar edição
+        document.querySelectorAll('#registerForm input').forEach(input => {
+            input.disabled = true;
+        });
+
+    } catch (error) {
+        console.error('❌ [SIGNUP ETAPA 1] Erro:', error);
+
+        let errorMessage = 'Erro ao confirmar dados';
+        if (error.message) {
+            errorMessage = error.message;
+        }
+
+        mostrarStatus('error', '❌ ' + errorMessage);
+
+        // Reabilitar botão
+        const btnConfirmar = document.getElementById('btnConfirmarDados');
+        btnConfirmar.disabled = false;
+        btnConfirmar.textContent = '✓ Confirmar Dados';
+    }
+}
+
+// ETAPA 2: Criar Conta no Auth - Finalizar signup
+async function criarContaAuth(event) {
+    event.preventDefault();
+
+    if (!signupTempData.tempUserId) {
+        Utils.showNotification('Erro: Dados temporários não encontrados. Recarregue a página.', 'error');
+        return;
+    }
+
+    try {
+        console.log('🔵 [SIGNUP ETAPA 2] Criando usuário no Auth...');
+
+        // Desabilitar botão e mostrar loading
+        const btnCriar = document.getElementById('btnCriarConta');
+        btnCriar.disabled = true;
+        btnCriar.textContent = 'Criando conta...';
+
+        mostrarStatus('info', '⏳ Criando sua conta, aguarde...');
+
+        // Criar usuário no Auth
         const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-            email: email,
-            password: password,
+            email: signupTempData.email,
+            password: signupTempData.password,
             options: {
                 data: {
-                    name: name,
-                    whatsapp: whatsapp,
-                    temp_user_id: tempUserId
+                    name: signupTempData.name,
+                    whatsapp: signupTempData.whatsapp,
+                    temp_user_id: signupTempData.tempUserId
                 }
             }
         });
 
         if (authError) {
-            console.error('❌ [SIGNUP] Erro no Auth:', authError);
+            console.error('❌ [SIGNUP ETAPA 2] Erro no Auth:', authError);
 
-            // Se erro for "User already registered", deletar da tabela usuarios
+            // Se email já está registrado no Auth, remover da tabela usuarios
             if (authError.message.includes('already registered') || authError.message.includes('User already registered')) {
-                console.warn('⚠️ [SIGNUP] Email já registrado no Auth, removendo da tabela...');
+                console.warn('⚠️ [SIGNUP ETAPA 2] Email já existe no Auth, removendo da tabela...');
                 await supabaseClient
                     .from('usuarios')
                     .delete()
-                    .eq('id', tempUserId);
+                    .eq('id', signupTempData.tempUserId);
 
-                Utils.showNotification('Este email já está cadastrado. Faça login.', 'error');
-                toggleForms();
+                mostrarStatus('error', '❌ Este email já possui uma conta. Faça login.');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
                 return;
             }
 
@@ -263,7 +341,7 @@ async function handleRegister(event) {
             await supabaseClient
                 .from('usuarios')
                 .delete()
-                .eq('id', tempUserId);
+                .eq('id', signupTempData.tempUserId);
 
             throw authError;
         }
@@ -273,46 +351,72 @@ async function handleRegister(event) {
             await supabaseClient
                 .from('usuarios')
                 .delete()
-                .eq('id', tempUserId);
+                .eq('id', signupTempData.tempUserId);
             throw new Error('Erro ao criar usuário no sistema de autenticação');
         }
 
-        console.log('✅ [SIGNUP] Usuário criado no Auth:', authData.user.id);
+        console.log('✅ [SIGNUP ETAPA 2] Usuário criado no Auth:', authData.user.id);
 
-        // PASSO 3: Atualizar o ID na tabela usuarios com o ID real do Auth
-        console.log('🔵 [SIGNUP] PASSO 3: Atualizando ID do usuário...');
+        // Atualizar o ID na tabela usuarios com o ID real do Auth
+        console.log('🔵 [SIGNUP ETAPA 2] Atualizando ID na tabela usuarios...');
 
         const { error: updateError } = await supabaseClient
             .from('usuarios')
             .update({ id: authData.user.id })
-            .eq('id', tempUserId);
+            .eq('id', signupTempData.tempUserId);
 
         if (updateError) {
-            console.error('❌ [SIGNUP] Erro ao atualizar ID:', updateError);
+            console.error('❌ [SIGNUP ETAPA 2] Erro ao atualizar ID:', updateError);
             // Não vamos falhar aqui, o usuário já foi criado
         } else {
-            console.log('✅ [SIGNUP] ID atualizado com sucesso');
+            console.log('✅ [SIGNUP ETAPA 2] ID atualizado com sucesso');
         }
 
-        Utils.showNotification('Conta criada com sucesso! Escolha seu plano.', 'success');
+        mostrarStatus('success', '✅ Conta criada com sucesso! Redirecionando...');
+
+        // Limpar dados temporários
+        signupTempData = { tempUserId: null, email: null, password: null, name: null, whatsapp: null };
 
         // Redirecionar para página de planos como novo usuário
         setTimeout(() => {
             window.location.href = 'index.html?new_user=true';
-        }, 1000);
+        }, 1500);
 
     } catch (error) {
-        console.error('❌ [SIGNUP] Erro geral no registro:', error);
-        console.error('❌ [SIGNUP] Stack trace:', error.stack);
+        console.error('❌ [SIGNUP ETAPA 2] Erro:', error);
 
-        // Melhorar mensagem de erro para o usuário
         let errorMessage = 'Erro ao criar conta';
-        if (error.message.includes('already registered')) {
-            errorMessage = 'Este email já está cadastrado. Faça login.';
-        } else if (error.message) {
-            errorMessage = 'Erro ao criar conta: ' + error.message;
+        if (error.message) {
+            errorMessage = error.message;
         }
 
-        Utils.showNotification(errorMessage, 'error');
+        mostrarStatus('error', '❌ ' + errorMessage);
+
+        // Reabilitar botão
+        const btnCriar = document.getElementById('btnCriarConta');
+        btnCriar.disabled = false;
+        btnCriar.textContent = '🚀 Criar Conta e Entrar';
+    }
+}
+
+// Função auxiliar para mostrar status do signup
+function mostrarStatus(tipo, mensagem) {
+    const statusDiv = document.getElementById('signupStatus');
+    statusDiv.classList.remove('hide');
+    statusDiv.textContent = mensagem;
+
+    // Cores baseadas no tipo
+    if (tipo === 'success') {
+        statusDiv.style.backgroundColor = '#d1f7d1';
+        statusDiv.style.borderColor = '#28a745';
+        statusDiv.style.color = '#155724';
+    } else if (tipo === 'error') {
+        statusDiv.style.backgroundColor = '#f8d7da';
+        statusDiv.style.borderColor = '#dc3545';
+        statusDiv.style.color = '#721c24';
+    } else if (tipo === 'info') {
+        statusDiv.style.backgroundColor = '#d1ecf1';
+        statusDiv.style.borderColor = '#17a2b8';
+        statusDiv.style.color = '#0c5460';
     }
 }
