@@ -14,7 +14,14 @@ const SUPABASE_URL = 'https://seu-projeto.supabase.co'; // Substitua aqui
 const SUPABASE_ANON_KEY = 'sua-chave-anonima-aqui'; // Substitua aqui
 
 // Inicializar cliente Supabase
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+if (!window.supabase) {
+    console.error('Erro: Biblioteca Supabase não foi carregada!');
+    alert('Erro ao carregar aplicação. Por favor, recarregue a página.');
+    throw new Error('Supabase library not loaded');
+}
+
+const { createClient } = window.supabase;
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Configurações globais
 const CONFIG = {

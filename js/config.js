@@ -12,9 +12,11 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 if (!window.supabase) {
     console.error('Erro: Biblioteca Supabase não foi carregada!');
     alert('Erro ao carregar aplicação. Por favor, recarregue a página.');
+    throw new Error('Supabase library not loaded');
 }
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const { createClient } = window.supabase;
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Configurações globais
 const CONFIG = {
