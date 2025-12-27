@@ -47,17 +47,10 @@
             <!-- Formulário de Registro -->
             <div id="registerForm" class="form-container hide">
                 <h2 class="mb-20">Criar Conta</h2>
+                <p style="color: var(--gray-700); margin-bottom: 20px; font-size: 14px;">
+                    Crie sua conta rapidamente. Depois você completa seu perfil.
+                </p>
                 <form onsubmit="handleRegister(event)">
-                    <div class="form-group">
-                        <label class="form-label" for="registerName">Nome Completo</label>
-                        <input
-                            type="text"
-                            id="registerName"
-                            class="form-input"
-                            required
-                            placeholder="Seu nome completo"
-                        >
-                    </div>
                     <div class="form-group">
                         <label class="form-label" for="registerEmail">Email</label>
                         <input
@@ -68,7 +61,7 @@
                             placeholder="seu@email.com"
                         >
                     </div>
-                    <div class="form-group">
+                    <div class="form-group hide">
                         <label class="form-label" for="registerWhatsapp">WhatsApp</label>
                         <div style="display: flex; gap: 10px;">
                             <select id="whatsappCountryCode" class="form-select" style="flex: 0 0 140px;" onchange="updateWhatsappFields()">
@@ -255,28 +248,7 @@
                         >
                     </div>
 
-                    <!-- Área de status do cadastro -->
-                    <div id="signupStatus" class="hide" style="padding: 15px; margin-bottom: 20px; border-radius: 8px; border: 2px solid; text-align: center; font-weight: 600;">
-                        <!-- Mensagem preenchida via JavaScript -->
-                    </div>
-
-                    <!-- Botão 1: Confirmar Dados -->
-                    <button
-                        type="button"
-                        id="btnConfirmarDados"
-                        class="btn btn-primary btn-block"
-                        onclick="confirmarDados(event)">
-                        ✓ Confirmar Dados
-                    </button>
-
-                    <!-- Botão 2: Criar Conta (inicialmente escondido) -->
-                    <button
-                        type="button"
-                        id="btnCriarConta"
-                        class="btn btn-primary btn-block hide"
-                        onclick="criarContaAuth(event)">
-                        🚀 Criar Conta e Entrar
-                    </button>
+                    <button type="submit" class="btn btn-primary btn-block">Criar Conta</button>
 
                     <div class="login-toggle">
                         Já tem conta?
@@ -314,6 +286,120 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal de Completar Perfil -->
+    <div id="modalCompletarPerfil" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <h2 style="margin-bottom: 15px;">🎉 Conta Criada!</h2>
+            <p style="color: var(--gray-700); margin-bottom: 25px; font-size: 16px;">
+                Agora complete seu perfil para começar a usar o app.
+            </p>
+            <form id="formCompletarPerfil" onsubmit="salvarPerfilInicial(event)">
+                <div class="form-group">
+                    <label class="form-label" for="perfilNome">Nome Completo *</label>
+                    <input
+                        type="text"
+                        id="perfilNome"
+                        class="form-input"
+                        required
+                        placeholder="Seu nome completo"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="perfilWhatsapp">WhatsApp *</label>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="perfilWhatsappCountryCode" class="form-select" style="flex: 0 0 140px;" onchange="updatePerfilWhatsappFields()">
+                            <option value="+55" data-ddd-length="2" data-phone-length="9">🇧🇷 Brasil +55</option>
+                            <option value="+1" data-ddd-length="3" data-phone-length="7">🇺🇸 EUA/Canadá +1</option>
+                            <option disabled>──────────</option>
+                            <option value="+351" data-ddd-length="0" data-phone-length="9">🇵🇹 Portugal +351</option>
+                            <option value="+34" data-ddd-length="0" data-phone-length="9">🇪🇸 Espanha +34</option>
+                            <option value="+44" data-ddd-length="2" data-phone-length="10">🇬🇧 Reino Unido +44</option>
+                        </select>
+                        <input
+                            type="tel"
+                            id="perfilWhatsappDDD"
+                            class="form-input"
+                            placeholder="DDD"
+                            maxlength="3"
+                            style="flex: 0 0 80px;"
+                            required
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                        >
+                        <input
+                            type="tel"
+                            id="perfilWhatsappNumber"
+                            class="form-input"
+                            placeholder="Número"
+                            maxlength="11"
+                            style="flex: 1;"
+                            required
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                        >
+                    </div>
+                    <small style="color: var(--text-muted); font-size: 12px; margin-top: 5px; display: block;">
+                        <span id="perfilWhatsappExample">Exemplo: DDD: 11, Número: 999999999</span>
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="perfilInstagram">Instagram (opcional)</label>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <span style="color: var(--gray-600);">@</span>
+                        <input
+                            type="text"
+                            id="perfilInstagram"
+                            class="form-input"
+                            placeholder="seu_usuario"
+                            style="flex: 1;"
+                            pattern="[a-zA-Z0-9._]+"
+                        >
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        Salvar e Continuar
+                    </button>
+                </div>
+            </form>
+
+            <script>
+                function updatePerfilWhatsappFields() {
+                    const select = document.getElementById('perfilWhatsappCountryCode');
+                    const option = select.options[select.selectedIndex];
+                    const dddLength = option.getAttribute('data-ddd-length');
+                    const phoneLength = option.getAttribute('data-phone-length');
+
+                    const dddInput = document.getElementById('perfilWhatsappDDD');
+                    const numberInput = document.getElementById('perfilWhatsappNumber');
+                    const example = document.getElementById('perfilWhatsappExample');
+
+                    if (dddLength === "0" || dddLength === 0) {
+                        dddInput.style.display = 'none';
+                        dddInput.required = false;
+                        dddInput.value = '';
+                        numberInput.setAttribute('maxlength', phoneLength);
+                        example.textContent = `Exemplo: Número: ${'9'.repeat(phoneLength)}`;
+                    } else {
+                        dddInput.style.display = 'block';
+                        dddInput.required = true;
+                        dddInput.setAttribute('maxlength', dddLength);
+                        numberInput.setAttribute('maxlength', phoneLength);
+                        example.textContent = `Exemplo: DDD: ${'1'.repeat(dddLength)}, Número: ${'9'.repeat(phoneLength)}`;
+                    }
+                }
+
+                // Inicializar ao carregar
+                setTimeout(() => {
+                    if (document.getElementById('perfilWhatsappCountryCode')) {
+                        updatePerfilWhatsappFields();
+                    }
+                }, 100);
+            </script>
         </div>
     </div>
 
