@@ -176,7 +176,8 @@ function renderizarQuestao() {
     container.innerHTML = '';
 
     if (questao.tipo_questao === 'multipla_escolha' && questao.alternativas) {
-        const alternativas = JSON.parse(questao.alternativas);
+        // Supabase retorna JSONB já como objeto, não precisa JSON.parse
+        const alternativas = questao.alternativas;
         const respostaSalva = respostasUsuario[questao.id]?.resposta;
 
         alternativas.forEach(alt => {
