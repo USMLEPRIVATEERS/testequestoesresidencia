@@ -132,13 +132,82 @@ const PlanoManager = {
 
     // Mostrar modal de upgrade
     mostrarModalUpgrade(motivo, questoesDisponiveis = 0) {
-        const mensagem = questoesDisponiveis > 0
-            ? `Você só tem ${questoesDisponiveis} questões disponíveis hoje. Faça upgrade para acesso ilimitado!`
-            : 'Você atingiu o limite diário de 10 questões. Faça upgrade para continuar estudando!';
-
-        if (confirm(`${mensagem}\n\nDeseja ver os planos disponíveis?`)) {
-            window.location.href = 'planos.html';
+        // Criar modal se não existir
+        let modal = document.getElementById('modalLimiteQuestoes');
+        if (!modal) {
+            modal = this.criarModalLimite();
+            document.body.appendChild(modal);
         }
+
+        // Atualizar conteúdo baseado nas questões disponíveis
+        const subtitleElement = modal.querySelector('.modal-limite-subtitle');
+        if (questoesDisponiveis > 0) {
+            subtitleElement.textContent = `Você só tem ${questoesDisponiveis} questões disponíveis hoje`;
+        } else {
+            subtitleElement.textContent = 'Você atingiu o limite diário de 10 questões grátis';
+        }
+
+        // Mostrar modal
+        modal.classList.add('show');
+    },
+
+    // Criar estrutura HTML do modal de limite
+    criarModalLimite() {
+        const modal = document.createElement('div');
+        modal.id = 'modalLimiteQuestoes';
+        modal.className = 'modal-limite';
+        modal.innerHTML = `
+            <div class="modal-limite-content">
+                <div class="modal-limite-icon">⏰</div>
+                <h2 class="modal-limite-title">Limite Diário Atingido</h2>
+                <p class="modal-limite-subtitle">Você atingiu o limite diário de 10 questões grátis</p>
+                <p class="modal-limite-info">
+                    Continue seus estudos com acesso ilimitado! Escolha um plano premium e estude sem limites.
+                </p>
+
+                <div class="modal-limite-highlight">
+                    <div class="modal-limite-highlight-title">Melhor Oferta</div>
+                    <div class="modal-limite-highlight-price">
+                        R$ 500<small>/ano</small>
+                    </div>
+                    <div class="modal-limite-highlight-period">
+                        Questões ilimitadas • Economize 31%
+                    </div>
+                </div>
+
+                <div class="modal-limite-actions">
+                    <button class="btn btn-primary" onclick="PlanoManager.assinarPlanoAnual()">
+                        Assinar Plano Anual
+                    </button>
+                    <button class="btn" onclick="PlanoManager.verTodosPlanos()">
+                        Ver Outros Planos
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Fechar ao clicar fora
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('show');
+            }
+        });
+
+        return modal;
+    },
+
+    // Ir para assinar plano anual
+    assinarPlanoAnual() {
+        // Por enquanto, vai para a página de planos (integração de pagamento futura)
+        Utils.showNotification('A integração de pagamento está sendo finalizada! Em breve você poderá assinar.', 'info');
+        setTimeout(() => {
+            window.location.href = 'planos.html';
+        }, 1500);
+    },
+
+    // Ver todos os planos
+    verTodosPlanos() {
+        window.location.href = 'planos.html';
     },
 
     // Formatar informações do plano para exibição

@@ -112,12 +112,11 @@ async function handleRegister(event) {
 
         if (dbError) throw dbError;
 
-        Utils.showNotification('Conta criada com sucesso! Faça login para continuar.', 'success');
+        Utils.showNotification('Conta criada com sucesso! Escolha seu plano.', 'success');
 
-        // Voltar para o formulário de login
+        // Redirecionar para página de planos como novo usuário
         setTimeout(() => {
-            toggleForms();
-            document.getElementById('loginEmail').value = email;
+            window.location.href = 'planos.html?new_user=true';
         }, 1000);
 
     } catch (error) {
