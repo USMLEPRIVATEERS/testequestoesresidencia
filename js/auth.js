@@ -252,19 +252,41 @@ async function salvarPerfilInicial(event) {
 
         console.log('🔵 [COMPLETAR PERFIL] Salvando na tabela usuarios:', dadosUsuario);
 
-        // UPSERT na tabela usuarios (insere se não existir, atualiza se já existir)
-        // Isso resolve o caso de triggers automáticos ou tentativas anteriores
-        const { data: upsertData, error: dbError } = await supabaseClient
+        // Tentar INSERT primeiro
+        let { data: insertData, error: dbError } = await supabaseClient
             .from('usuarios')
-            .upsert([dadosUsuario], { onConflict: 'id' })
+            .insert([dadosUsuario])
             .select();
+
+        // Se der erro de duplicate key (23505), tentar UPDATE
+        if (dbError && dbError.code === '23505') {
+            console.warn('⚠️ [COMPLETAR PERFIL] Registro já existe, tentando UPDATE...');
+
+            const { data: updateData, error: updateError } = await supabaseClient
+                .from('usuarios')
+                .update({
+                    nome: dadosUsuario.nome,
+                    whatsapp: dadosUsuario.whatsapp,
+                    instagram: dadosUsuario.instagram
+                })
+                .eq('id', user.id)
+                .select();
+
+            if (updateError) {
+                console.error('❌ [COMPLETAR PERFIL] Erro ao atualizar:', updateError);
+                throw new Error('Erro ao atualizar perfil: ' + updateError.message);
+            }
+
+            insertData = updateData;
+            dbError = null;
+        }
 
         if (dbError) {
             console.error('❌ [COMPLETAR PERFIL] Erro ao salvar:', dbError);
             throw new Error('Erro ao salvar perfil: ' + dbError.message);
         }
 
-        console.log('✅ [COMPLETAR PERFIL] Perfil salvo com sucesso:', upsertData);
+        console.log('✅ [COMPLETAR PERFIL] Perfil salvo com sucesso:', insertData);
 
         Utils.showNotification('Perfil completado! Redirecionando...', 'success');
 
