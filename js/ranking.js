@@ -71,8 +71,8 @@ async function carregarRanking() {
         const results = await Promise.all(rankingPromises);
         rankingData = results.filter(r => r !== null);
 
-        // Filtrar apenas usuários com pelo menos 1 questão
-        rankingData = rankingData.filter(r => r.total_questoes > 0);
+        // Mostrar todos os usuários, mesmo que não tenham respondido questões
+        // (removido o filtro r.total_questoes > 0)
 
         if (rankingData.length === 0) {
             document.getElementById('loadingRanking').classList.add('hide');
@@ -164,6 +164,17 @@ function renderizarRanking() {
             instagramCell = '<span style="color: var(--secondary-color);">-</span>';
         }
 
+        // Texto de questões respondidas
+        const questoesText = usuario.total_questoes > 0
+            ? `<strong>${usuario.total_questoes}</strong> questões`
+            : '<span style="color: var(--secondary-color);">Nenhuma questão ainda</span>';
+
+        // Stats badge só se tiver questões
+        const statsText = usuario.total_questoes > 0
+            ? `<span class="stats-badge ${badgeClass}">${usuario.porcentagem_acertos}%</span>
+               <span style="color: var(--secondary-color); font-size: 12px;"> (${usuario.total_corretas}/${usuario.total_questoes})</span>`
+            : '<span style="color: var(--secondary-color);">-</span>';
+
         tr.innerHTML = `
             <td class="ranking-position">${medalha}${posicao}º</td>
             <td>
@@ -171,11 +182,8 @@ function renderizarRanking() {
                 ${isCurrentUser ? '<span style="color: var(--secondary-color); font-size: 12px;"> (você)</span>' : ''}
             </td>
             <td>${instagramCell}</td>
-            <td><strong>${usuario.total_questoes}</strong> questões</td>
-            <td>
-                <span class="stats-badge ${badgeClass}">${usuario.porcentagem_acertos}%</span>
-                <span style="color: var(--secondary-color); font-size: 12px;"> (${usuario.total_corretas}/${usuario.total_questoes})</span>
-            </td>
+            <td>${questoesText}</td>
+            <td>${statsText}</td>
         `;
 
         tbody.appendChild(tr);
