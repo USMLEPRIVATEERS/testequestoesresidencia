@@ -172,7 +172,7 @@ async function enviarContribuicao(event) {
                     link_drive: linkDrive,
                     observacoes: observacoes || null,
                     status: 'pendente',
-                    data_criacao: new Date().toISOString()
+                    data_contribuicao: new Date().toISOString()
                 }
             ]);
 
@@ -207,7 +207,7 @@ async function carregarMinhasContribuicoes() {
                 prova_necessaria:provas_necessarias(instituicao, processo_seletivo, ano, especialidade)
             `)
             .eq('usuario_id', userId)
-            .order('data_criacao', { ascending: false });
+            .order('data_contribuicao', { ascending: false });
 
         if (error) throw error;
 
@@ -270,7 +270,7 @@ function renderizarMinhasContribuicoes(contribuicoes) {
 
                 <div style="background: var(--white); padding: 12px; border-radius: var(--radius); margin-bottom: 12px;">
                     <div style="font-size: 13px; color: var(--gray-700); margin-bottom: 6px;">
-                        <strong>Enviado em:</strong> ${new Date(contrib.data_criacao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                        <strong>Enviado em:</strong> ${new Date(contrib.data_contribuicao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
                     </div>
                     <div style="font-size: 13px; color: var(--gray-700);">
                         <strong>Link do Drive:</strong>
