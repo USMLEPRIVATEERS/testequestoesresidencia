@@ -7,78 +7,107 @@
     <link rel="stylesheet" href="css/styles.css">
     <style>
         .profile-header {
-            background: linear-gradient(135deg, var(--primary-color), #357ABD);
-            color: white;
+            background: var(--white);
+            border: 3px solid var(--black);
+            color: var(--black);
             padding: 40px;
-            border-radius: 8px;
+            border-radius: var(--radius-xl);
             margin-bottom: 30px;
             text-align: center;
+            box-shadow: var(--shadow-lg);
         }
 
         .profile-avatar {
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            background: white;
-            color: var(--primary-color);
+            background: var(--black);
+            color: var(--white);
             font-size: 48px;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: var(--shadow);
+            border: 4px solid var(--white);
+            outline: 3px solid var(--black);
         }
 
         .profile-name {
             font-size: 32px;
-            font-weight: 600;
+            font-weight: 800;
             margin-bottom: 10px;
+            color: var(--black);
+            letter-spacing: -1px;
         }
 
         .profile-stats-inline {
             display: flex;
             gap: 30px;
             justify-content: center;
-            margin-top: 20px;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid var(--gray-200);
         }
 
         .profile-stats-inline .stat-item {
             text-align: center;
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            background: var(--gray-50);
+            border: 2px solid var(--gray-300);
+            transition: var(--transition);
+        }
+
+        .profile-stats-inline .stat-item:hover {
+            border-color: var(--black);
+            transform: translateY(-2px);
         }
 
         .profile-stats-inline .stat-value {
-            font-size: 28px;
-            font-weight: bold;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--black);
+            letter-spacing: -1px;
         }
 
         .profile-stats-inline .stat-label {
-            font-size: 14px;
-            opacity: 0.9;
+            font-size: 13px;
+            color: var(--gray-700);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
         }
 
         .social-links {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             justify-content: center;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         .social-link {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            color: white;
+            padding: 10px 18px;
+            background: var(--white);
+            border: 2px solid var(--black);
+            border-radius: var(--radius-full);
+            color: var(--black);
             text-decoration: none;
             font-size: 14px;
+            font-weight: 600;
             transition: var(--transition);
         }
 
         .social-link:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: var(--black);
+            color: var(--white);
+            transform: translateY(-2px);
         }
 
         .back-link {
@@ -101,47 +130,57 @@
         }
 
         .period-tab {
-            padding: 10px 20px;
-            border: 1px solid var(--border-color);
-            background: var(--background-color);
-            color: var(--text-color);
+            padding: 12px 24px;
+            border: 2px solid var(--gray-300);
+            background: var(--white);
+            color: var(--black);
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: var(--radius-full);
             transition: var(--transition);
+            font-weight: 600;
+            font-size: 14px;
         }
 
         .period-tab.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
         }
 
         .period-tab:hover:not(.active) {
-            background: var(--hover-color);
+            border-color: var(--black);
+            background: var(--gray-50);
         }
 
         .achievement-badge {
             display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             margin: 5px;
+            border: 2px solid;
+            letter-spacing: 0.5px;
         }
 
         .achievement-badge.gold {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #000;
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--black);
         }
 
         .achievement-badge.silver {
-            background: linear-gradient(135deg, #C0C0C0, #808080);
-            color: #000;
+            background: var(--gray-700);
+            color: var(--white);
+            border-color: var(--gray-700);
         }
 
         .achievement-badge.bronze {
-            background: linear-gradient(135deg, #CD7F32, #8B4513);
-            color: white;
+            background: var(--gray-500);
+            color: var(--white);
+            border-color: var(--gray-500);
         }
     </style>
 </head>
