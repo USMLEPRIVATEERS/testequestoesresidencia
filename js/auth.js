@@ -183,7 +183,7 @@ async function handleRegister(event) {
     try {
         console.log('🔵 [SIGNUP] Iniciando cadastro com dados:', { name, email, whatsapp });
 
-        // Verificar se usuário já existe antes de tentar criar
+        // Verificar se usuário já existe na tabela
         const { data: existingUser } = await supabaseClient
             .from('usuarios')
             .select('id, email')
@@ -193,90 +193,105 @@ async function handleRegister(event) {
         if (existingUser) {
             console.log('⚠️ [SIGNUP] Usuário já existe:', email);
             Utils.showNotification('Este email já está cadastrado. Faça login.', 'error');
-            toggleForms(); // Volta para tela de login
+            toggleForms();
             return;
         }
 
-        // Criar usuário no Supabase Auth com metadata
+        // PASSO 1: Criar na tabela usuarios PRIMEIRO
+        // Gerar um ID temporário único para o usuário
+        const tempUserId = crypto.randomUUID();
+
+        const dadosUsuario = {
+            id: tempUserId,
+            email: email,
+            nome: name,
+            whatsapp: whatsapp,
+            plano: 'free',
+            provas_selecionadas: [],
+            questoes_respondidas_hoje: 0
+        };
+
+        console.log('🔵 [SIGNUP] PASSO 1: Inserindo na tabela usuarios PRIMEIRO:', dadosUsuario);
+
+        const { data: insertData, error: dbError } = await supabaseClient
+            .from('usuarios')
+            .insert([dadosUsuario])
+            .select();
+
+        if (dbError) {
+            console.error('❌ [SIGNUP] Erro ao inserir na tabela usuarios:', dbError);
+            throw new Error('Erro ao salvar dados: ' + dbError.message);
+        }
+
+        console.log('✅ [SIGNUP] Dados salvos na tabela usuarios:', insertData);
+
+        // Aguardar um momento
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        // PASSO 2: Criar no Auth DEPOIS
+        console.log('🔵 [SIGNUP] PASSO 2: Criando usuário no Auth...');
+
         const { data: authData, error: authError } = await supabaseClient.auth.signUp({
             email: email,
             password: password,
             options: {
                 data: {
                     name: name,
-                    whatsapp: whatsapp
+                    whatsapp: whatsapp,
+                    temp_user_id: tempUserId
                 }
             }
         });
 
         if (authError) {
-            // Se erro for "User already registered", significa que existe no Auth mas não na tabela
+            console.error('❌ [SIGNUP] Erro no Auth:', authError);
+
+            // Se erro for "User already registered", deletar da tabela usuarios
             if (authError.message.includes('already registered') || authError.message.includes('User already registered')) {
-                console.warn('⚠️ [SIGNUP] Usuário existe no Auth mas não na tabela usuarios');
+                console.warn('⚠️ [SIGNUP] Email já registrado no Auth, removendo da tabela...');
+                await supabaseClient
+                    .from('usuarios')
+                    .delete()
+                    .eq('id', tempUserId);
+
                 Utils.showNotification('Este email já está cadastrado. Faça login.', 'error');
                 toggleForms();
                 return;
             }
-            console.error('❌ [SIGNUP] Erro no Supabase Auth:', authError);
+
+            // Outro erro: remover da tabela usuarios
+            await supabaseClient
+                .from('usuarios')
+                .delete()
+                .eq('id', tempUserId);
+
             throw authError;
         }
 
         if (!authData || !authData.user) {
-            throw new Error('Erro ao criar usuário: dados inválidos');
+            // Remover da tabela se Auth falhou
+            await supabaseClient
+                .from('usuarios')
+                .delete()
+                .eq('id', tempUserId);
+            throw new Error('Erro ao criar usuário no sistema de autenticação');
         }
 
         console.log('✅ [SIGNUP] Usuário criado no Auth:', authData.user.id);
 
-        // Aguardar um momento para o trigger do banco criar o registro
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // PASSO 3: Atualizar o ID na tabela usuarios com o ID real do Auth
+        console.log('🔵 [SIGNUP] PASSO 3: Atualizando ID do usuário...');
 
-        // Verificar se registro foi criado pelo trigger, senão criar manualmente (fallback)
-        let { data: usuarioExistente } = await supabaseClient
+        const { error: updateError } = await supabaseClient
             .from('usuarios')
-            .select('id')
-            .eq('id', authData.user.id)
-            .single();
+            .update({ id: authData.user.id })
+            .eq('id', tempUserId);
 
-        if (!usuarioExistente) {
-            console.log('⚠️ [SIGNUP] Trigger não criou registro, criando manualmente (fallback)');
-
-            // Criar registro na tabela usuarios manualmente
-            const dadosUsuario = {
-                id: authData.user.id,
-                email: email,
-                nome: name,
-                whatsapp: whatsapp,
-                provas_selecionadas: [],
-            };
-
-            console.log('🔵 [SIGNUP] Inserindo na tabela usuarios:', dadosUsuario);
-
-            const { data: insertData, error: dbError } = await supabaseClient
-                .from('usuarios')
-                .insert([dadosUsuario])
-                .select();
-
-            if (dbError) {
-                console.error('❌ [SIGNUP] Erro ao inserir na tabela usuarios:', dbError);
-
-                // Se erro for duplicate key, o trigger criou entre nossa verificação e insert
-                if (dbError.code === '23505') {
-                    console.log('✅ [SIGNUP] Registro já foi criado pelo trigger');
-                } else {
-                    console.error('❌ [SIGNUP] Detalhes do erro:', JSON.stringify(dbError, null, 2));
-                    throw dbError;
-                }
-            } else {
-                console.log('✅ [SIGNUP] Dados salvos na tabela usuarios (fallback):', insertData);
-            }
+        if (updateError) {
+            console.error('❌ [SIGNUP] Erro ao atualizar ID:', updateError);
+            // Não vamos falhar aqui, o usuário já foi criado
         } else {
-            console.log('✅ [SIGNUP] Registro criado automaticamente pelo trigger');
-
-            // Atualizar nome e whatsapp já que o trigger pode não ter esses dados
-            await supabaseClient
-                .from('usuarios')
-                .update({ nome: name, whatsapp: whatsapp })
-                .eq('id', authData.user.id);
+            console.log('✅ [SIGNUP] ID atualizado com sucesso');
         }
 
         Utils.showNotification('Conta criada com sucesso! Escolha seu plano.', 'success');
