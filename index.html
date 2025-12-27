@@ -68,6 +68,21 @@
                         >
                     </div>
                     <div class="form-group">
+                        <label class="form-label" for="registerWhatsapp">WhatsApp</label>
+                        <input
+                            type="tel"
+                            id="registerWhatsapp"
+                            class="form-input"
+                            required
+                            placeholder="+5511999999999"
+                            pattern="\+[0-9]{12,15}"
+                            title="Formato: +55 (código do país) + DDD + número. Exemplo: +5511999999999"
+                        >
+                        <small style="color: var(--secondary-color); font-size: 12px;">
+                            Formato: +55 (código) + DDD + número. Ex: +5511999999999
+                        </small>
+                    </div>
+                    <div class="form-group">
                         <label class="form-label" for="registerPassword">Senha</label>
                         <input
                             type="password"

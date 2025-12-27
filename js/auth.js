@@ -60,8 +60,16 @@ async function handleRegister(event) {
 
     const name = document.getElementById('registerName').value;
     const email = document.getElementById('registerEmail').value;
+    const whatsapp = document.getElementById('registerWhatsapp').value;
     const password = document.getElementById('registerPassword').value;
     const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+
+    // Validar WhatsApp
+    const whatsappRegex = /^\+[0-9]{12,15}$/;
+    if (!whatsappRegex.test(whatsapp)) {
+        Utils.showNotification('WhatsApp inválido! Use o formato: +5511999999999', 'error');
+        return;
+    }
 
     // Validar senhas
     if (password !== passwordConfirm) {
@@ -91,6 +99,7 @@ async function handleRegister(event) {
                     id: authData.user.id,
                     email: email,
                     nome: name,
+                    whatsapp: whatsapp,
                     provas_selecionadas: [],
                 }
             ]);

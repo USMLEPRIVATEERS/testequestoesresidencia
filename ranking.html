@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking - Questões Residência</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .ranking-table th,
+        .ranking-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .ranking-table th {
+            background-color: var(--hover-color);
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        .ranking-table th:hover {
+            background-color: var(--border-color);
+        }
+
+        .ranking-table th.sortable::after {
+            content: ' ⇅';
+            color: var(--secondary-color);
+            font-size: 12px;
+        }
+
+        .ranking-table th.sorted-asc::after {
+            content: ' ↑';
+            color: var(--primary-color);
+        }
+
+        .ranking-table th.sorted-desc::after {
+            content: ' ↓';
+            color: var(--primary-color);
+        }
+
+        .ranking-table tr:hover {
+            background-color: var(--hover-color);
+        }
+
+        .ranking-position {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 18px;
+        }
+
+        .user-name {
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .user-name:hover {
+            text-decoration: underline;
+        }
+
+        .instagram-link {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .instagram-link:hover {
+            text-decoration: underline;
+        }
+
+        .add-instagram-btn {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .pagination button {
+            padding: 8px 15px;
+            border: 1px solid var(--border-color);
+            background: var(--background-color);
+            color: var(--text-color);
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--hover-color);
+        }
+
+        .pagination .page-info {
+            color: var(--secondary-color);
+        }
+
+        .highlight-current-user {
+            background-color: rgba(74, 144, 226, 0.1);
+            font-weight: 600;
+        }
+
+        .medal {
+            font-size: 20px;
+            margin-right: 5px;
+        }
+
+        .stats-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .stats-badge.excellent {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success-color);
+        }
+
+        .stats-badge.good {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: var(--primary-color);
+        }
+
+        .stats-badge.average {
+            background-color: rgba(241, 196, 15, 0.2);
+            color: #f1c40f;
+        }
+
+        .stats-badge.low {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--error-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">QUESTÕES RESIDÊNCIA</div>
+            <nav class="nav">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="criar-teste.html" class="nav-link">Novo Teste</a>
+                <a href="testes-anteriores.html" class="nav-link">Testes Anteriores</a>
+                <a href="ranking.html" class="nav-link active">Ranking</a>
+                <a href="#" onclick="Utils.logout()" class="nav-link">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1 class="mb-30">Ranking de Estudantes</h1>
+
+        <!-- Filtros e Período -->
+        <div class="card mb-30">
+            <div class="card-body">
+                <div class="flex-between">
+                    <div>
+                        <h3>Últimos 30 dias</h3>
+                        <p style="color: var(--secondary-color); margin-top: 5px;">
+                            Ranking baseado no desempenho dos estudantes nos últimos 30 dias
+                        </p>
+                    </div>
+                    <div>
+                        <label class="form-label">Ordenar por:</label>
+                        <select id="sortBySelect" class="form-select" onchange="changeSortBy()" style="width: 200px;">
+                            <option value="questoes_desc">Mais Questões</option>
+                            <option value="acertos_desc">Maior % Acertos</option>
+                            <option value="nome_asc">Nome (A-Z)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Ranking -->
+        <div class="card">
+            <div class="card-body">
+                <div id="loadingRanking" class="loader">
+                    <div class="spinner"></div>
+                </div>
+
+                <div id="rankingContent" class="hide">
+                    <table class="ranking-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">#</th>
+                                <th class="sortable" onclick="sortBy('nome')">Nome</th>
+                                <th class="sortable" onclick="sortBy('instagram')">Instagram</th>
+                                <th class="sortable" onclick="sortBy('total_questoes')" style="width: 150px;">Questões (30d)</th>
+                                <th class="sortable" onclick="sortBy('porcentagem_acertos')" style="width: 150px;">% Acertos</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rankingTableBody">
+                            <!-- Preenchido via JavaScript -->
+                        </tbody>
+                    </table>
+
+                    <!-- Paginação -->
+                    <div class="pagination">
+                        <button onclick="previousPage()" id="btnPrevPage">← Anterior</button>
+                        <span class="page-info" id="pageInfo">Página 1 de 1</span>
+                        <button onclick="nextPage()" id="btnNextPage">Próxima →</button>
+                    </div>
+                </div>
+
+                <!-- Mensagem quando não há dados -->
+                <div id="noDataMessage" class="hide text-center" style="padding: 40px;">
+                    <h3>Nenhum dado de ranking disponível</h3>
+                    <p style="color: var(--secondary-color); margin-top: 10px;">
+                        Complete alguns testes para aparecer no ranking!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar Instagram -->
+    <div id="modalInstagram" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="fecharModalInstagram()">&times;</span>
+            <h2 class="mb-20">Adicionar Instagram</h2>
+            <p class="mb-20" style="color: var(--secondary-color);">
+                Adicione seu Instagram para que outros estudantes possam te encontrar!
+            </p>
+            <div class="form-group">
+                <label class="form-label" for="instagramInput">Nome de usuário (sem @)</label>
+                <input
+                    type="text"
+                    id="instagramInput"
+                    class="form-input"
+                    placeholder="exemplo: joaosilva123"
+                    pattern="^[a-zA-Z0-9._]{1,30}$"
+                    maxlength="30"
+                >
+                <small style="color: var(--secondary-color); font-size: 12px;">
+                    Apenas letras, números, pontos e underscores. Máximo 30 caracteres.
+                </small>
+            </div>
+            <div class="flex gap-10 mt-30">
+                <button class="btn btn-primary" onclick="salvarInstagram()">Salvar</button>
+                <button class="btn" onclick="fecharModalInstagram()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/ranking.js"></script>
+</body>
+</html>

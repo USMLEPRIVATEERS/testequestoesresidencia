@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil do Usuário - Questões Residência</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary-color), #357ABD);
+            color: white;
+            padding: 40px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: white;
+            color: var(--primary-color);
+            font-size: 48px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .profile-name {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .profile-stats-inline {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .profile-stats-inline .stat-item {
+            text-align: center;
+        }
+
+        .profile-stats-inline .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .profile-stats-inline .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .social-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .period-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .period-tab {
+            padding: 10px 20px;
+            border: 1px solid var(--border-color);
+            background: var(--background-color);
+            color: var(--text-color);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .period-tab.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .period-tab:hover:not(.active) {
+            background: var(--hover-color);
+        }
+
+        .achievement-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 5px;
+        }
+
+        .achievement-badge.gold {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+        }
+
+        .achievement-badge.silver {
+            background: linear-gradient(135deg, #C0C0C0, #808080);
+            color: #000;
+        }
+
+        .achievement-badge.bronze {
+            background: linear-gradient(135deg, #CD7F32, #8B4513);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">QUESTÕES RESIDÊNCIA</div>
+            <nav class="nav">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="criar-teste.html" class="nav-link">Novo Teste</a>
+                <a href="testes-anteriores.html" class="nav-link">Testes Anteriores</a>
+                <a href="ranking.html" class="nav-link">Ranking</a>
+                <a href="#" onclick="Utils.logout()" class="nav-link">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <a href="ranking.html" class="back-link">← Voltar ao Ranking</a>
+
+        <!-- Loading -->
+        <div id="loadingProfile" class="loader">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Conteúdo do Perfil -->
+        <div id="profileContent" class="hide">
+            <!-- Cabeçalho do Perfil -->
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileAvatar"></div>
+                <div class="profile-name" id="profileName">Carregando...</div>
+                <div class="social-links" id="socialLinks">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+                <div class="profile-stats-inline">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalQuestoesGeral">0</div>
+                        <div class="stat-label">Total de Questões</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="porcentagemGeral">0%</div>
+                        <div class="stat-label">% de Acertos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="posicaoRanking">-</div>
+                        <div class="stat-label">Posição no Ranking</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs de Período -->
+            <div class="period-tabs">
+                <button class="period-tab active" onclick="changePeriod(30)" id="tab30">Últimos 30 dias</button>
+                <button class="period-tab" onclick="changePeriod(90)" id="tab90">Últimos 90 dias</button>
+                <button class="period-tab" onclick="changePeriod(0)" id="tabAll">Todo período</button>
+            </div>
+
+            <!-- Estatísticas Detalhadas -->
+            <div class="row">
+                <div class="col-3">
+                    <div class="stat-box">
+                        <div class="stat-value" id="totalQuestoes">-</div>
+                        <div class="stat-label">Questões Respondidas</div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="stat-box">
+                        <div class="stat-value" style="color: var(--success-color)" id="totalCorretas">-</div>
+                        <div class="stat-label">Corretas</div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="stat-box">
+                        <div class="stat-value" style="color: var(--error-color)" id="totalIncorretas">-</div>
+                        <div class="stat-label">Incorretas</div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="stat-box">
+                        <div class="stat-value" id="porcentagemAcertos">-</div>
+                        <div class="stat-label">% de Acertos</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conquistas -->
+            <div class="card mt-30">
+                <div class="card-title">Conquistas</div>
+                <div class="card-body">
+                    <div id="achievementsContainer">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estatísticas por Assunto -->
+            <div class="card mt-30">
+                <div class="card-title">Desempenho por Assunto</div>
+                <div class="card-body">
+                    <div id="assuntosStats">
+                        <p style="color: var(--secondary-color);">Carregando estatísticas...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Atividade Recente -->
+            <div class="card mt-30">
+                <div class="card-title">Atividade Recente</div>
+                <div class="card-body">
+                    <div id="atividadeRecente">
+                        <p style="color: var(--secondary-color);">Carregando atividades...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensagem de erro -->
+        <div id="errorMessage" class="hide">
+            <div class="card">
+                <div class="card-body text-center" style="padding: 40px;">
+                    <h3>Usuário não encontrado</h3>
+                    <p style="color: var(--secondary-color); margin-top: 10px;">
+                        O perfil que você está procurando não existe ou foi removido.
+                    </p>
+                    <a href="ranking.html" class="btn btn-primary mt-20">Voltar ao Ranking</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/perfil.js"></script>
+</body>
+</html>
