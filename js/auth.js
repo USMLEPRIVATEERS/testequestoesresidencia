@@ -28,7 +28,7 @@ async function handleLogin(event) {
 
     try {
         // Fazer login com Supabase Auth
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
             email: email,
             password: password,
         });
@@ -36,7 +36,7 @@ async function handleLogin(event) {
         if (error) throw error;
 
         // Atualizar último acesso
-        await supabase
+        await supabaseClient
             .from('usuarios')
             .update({ ultimo_acesso: new Date().toISOString() })
             .eq('id', data.user.id);
@@ -84,7 +84,7 @@ async function handleRegister(event) {
 
     try {
         // Criar usuário no Supabase Auth
-        const { data: authData, error: authError } = await supabase.auth.signUp({
+        const { data: authData, error: authError } = await supabaseClient.auth.signUp({
             email: email,
             password: password,
         });
@@ -92,7 +92,7 @@ async function handleRegister(event) {
         if (authError) throw authError;
 
         // Criar registro na tabela usuarios
-        const { error: dbError } = await supabase
+        const { error: dbError } = await supabaseClient
             .from('usuarios')
             .insert([
                 {

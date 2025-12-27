@@ -42,7 +42,7 @@ async function carregarTeste() {
             testeData = testeLocal;
         } else {
             // Se não tiver no localStorage, buscar do banco
-            const { data: teste, error } = await supabase
+            const { data: teste, error } = await supabaseClient
                 .from('testes')
                 .select('*')
                 .eq('id', testeId)
@@ -51,7 +51,7 @@ async function carregarTeste() {
             if (error) throw error;
 
             // Buscar questões
-            const { data: questoes, error: questoesError } = await supabase
+            const { data: questoes, error: questoesError } = await supabaseClient
                 .from('questoes')
                 .select('*')
                 .in('id', teste.questoes_ids);
@@ -102,7 +102,7 @@ async function carregarTeste() {
 // Carregar respostas já dadas anteriormente
 async function carregarRespostasExistentes() {
     try {
-        const { data: respostas, error } = await supabase
+        const { data: respostas, error } = await supabaseClient
             .from('respostas_usuarios')
             .select('questao_id, resposta_usuario, status_resposta')
             .eq('teste_id', testeData.testeId);
@@ -378,7 +378,7 @@ async function salvarResposta(questaoId, resposta) {
         const correto = resposta === questao.gabarito;
         const status = correto ? 'C' : 'I';
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('respostas_usuarios')
             .insert([
                 {
@@ -405,7 +405,7 @@ async function salvarResposta(questaoId, resposta) {
 // Carregar comentários de uma questão
 async function carregarComentarios(questaoId) {
     try {
-        const { data: comentarios, error } = await supabase
+        const { data: comentarios, error } = await supabaseClient
             .from('comentarios')
             .select('*, usuarios(nome)')
             .eq('questao_id', questaoId)
@@ -458,7 +458,7 @@ async function adicionarComentario(questaoId) {
             return;
         }
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('comentarios')
             .insert([
                 {
@@ -532,7 +532,7 @@ async function pausarTeste() {
 
     try {
         // Atualizar status no banco
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('testes')
             .update({
                 status: 'pausado',
@@ -576,7 +576,7 @@ async function finalizarTeste() {
         // Atualizar teste como finalizado
         const tempoTotal = Math.floor((Date.now() - tempoInicio) / 1000);
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('testes')
             .update({
                 status: 'finalizado',
@@ -613,7 +613,7 @@ async function mostrarResultadoFinal() {
     const porcentagem = Utils.calcPercentage(corretas, total);
 
     // Buscar tempo total do teste
-    const { data: teste } = await supabase
+    const { data: teste } = await supabaseClient
         .from('testes')
         .select('tempo_total_segundos')
         .eq('id', testeData.testeId)

@@ -31,7 +31,7 @@ async function carregarEstatisticas() {
         const provasSelecionadas = currentUser.provas_selecionadas || [];
 
         // Total de questões disponíveis nas provas selecionadas
-        let totalQuestoesQuery = supabase
+        let totalQuestoesQuery = supabaseClient
             .from('questoes')
             .select('id', { count: 'exact', head: true });
 
@@ -42,7 +42,7 @@ async function carregarEstatisticas() {
         const { count: totalQuestoes } = await totalQuestoesQuery;
 
         // Questões respondidas pelo usuário
-        const { data: respostas, error: respostasError } = await supabase
+        const { data: respostas, error: respostasError } = await supabaseClient
             .from('respostas_usuarios')
             .select('status_resposta')
             .eq('usuario_id', userId);
@@ -97,7 +97,7 @@ async function editarProvas() {
 
     // Carregar lista de provas disponíveis
     try {
-        const { data: provas, error } = await supabase
+        const { data: provas, error } = await supabaseClient
             .from('questoes')
             .select('processo_seletivo')
             .order('processo_seletivo');
@@ -162,7 +162,7 @@ async function atualizarGrafico() {
         const metrica = document.getElementById('metricaPicker').value;
 
         // Chamar função do Supabase para obter dados
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .rpc('obter_estatisticas_dashboard', {
                 p_usuario_id: userId,
                 p_periodo: periodo,

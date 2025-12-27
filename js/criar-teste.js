@@ -16,7 +16,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 async function carregarOpcoesDosFiltros() {
     try {
         // Buscar todas as questões para extrair valores únicos
-        const { data: questoes, error } = await supabase
+        const { data: questoes, error } = await supabaseClient
             .from('questoes')
             .select('instituicao, processo_seletivo, ano, assunto, sistema, categoria, topico, subtopico');
 
@@ -99,7 +99,7 @@ async function contarQuestoesDisponiveis() {
         const userId = session.user.id;
 
         // Usar a função do Supabase para obter questões não respondidas
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .rpc('obter_questoes_nao_respondidas', {
                 p_usuario_id: userId,
                 p_filtros: filtrosAtuais,
@@ -178,7 +178,7 @@ async function iniciarTeste() {
         btnIniciar.textContent = 'Carregando...';
 
         // Buscar questões
-        const { data: questoes, error: questoesError } = await supabase
+        const { data: questoes, error: questoesError } = await supabaseClient
             .rpc('obter_questoes_nao_respondidas', {
                 p_usuario_id: userId,
                 p_filtros: filtrosAtuais,
@@ -197,7 +197,7 @@ async function iniciarTeste() {
         // Criar teste no banco
         const questoesIds = questoes.map(q => q.questao_id);
 
-        const { data: teste, error: testeError } = await supabase
+        const { data: teste, error: testeError } = await supabaseClient
             .from('testes')
             .insert([
                 {

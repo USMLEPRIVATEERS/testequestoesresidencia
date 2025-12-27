@@ -5,7 +5,7 @@
 class Utils {
     // Verificar se usuário está autenticado
     static async checkAuth() {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await supabaseClient.auth.getSession();
         return session;
     }
 
@@ -21,7 +21,7 @@ class Utils {
 
     // Fazer logout
     static async logout() {
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
         window.location.href = 'index.html';
     }
 
@@ -181,7 +181,7 @@ class UserManager {
         const session = await Utils.checkAuth();
         if (!session) return null;
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('usuarios')
             .select('*')
             .eq('id', session.user.id)
@@ -200,7 +200,7 @@ class UserManager {
         const session = await Utils.checkAuth();
         if (!session) return;
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('usuarios')
             .update({ provas_selecionadas: provas })
             .eq('id', session.user.id);

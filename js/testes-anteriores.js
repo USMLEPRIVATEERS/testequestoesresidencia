@@ -18,7 +18,7 @@ async function carregarTestes() {
         const session = await Utils.checkAuth();
         const userId = session.user.id;
 
-        const { data: testes, error } = await supabase
+        const { data: testes, error } = await supabaseClient
             .from('testes')
             .select('*')
             .eq('usuario_id', userId)
@@ -44,7 +44,7 @@ async function carregarTestes() {
 // Carregar estatísticas de um teste
 async function carregarEstatisticasTeste(teste) {
     try {
-        const { data: respostas, error } = await supabase
+        const { data: respostas, error } = await supabaseClient
             .from('respostas_usuarios')
             .select('status_resposta')
             .eq('teste_id', teste.id);
@@ -268,7 +268,7 @@ async function confirmarRefazer() {
         if (!testeOriginal) throw new Error('Teste não encontrado');
 
         // Buscar questões do teste original
-        const { data: questoes, error: questoesError } = await supabase
+        const { data: questoes, error: questoesError } = await supabaseClient
             .from('questoes')
             .select('*')
             .in('id', testeOriginal.questoes_ids);
@@ -281,7 +281,7 @@ async function confirmarRefazer() {
         );
 
         // Criar novo teste
-        const { data: novoTeste, error: novoTesteError } = await supabase
+        const { data: novoTeste, error: novoTesteError } = await supabaseClient
             .from('testes')
             .insert([
                 {
@@ -326,7 +326,7 @@ async function excluirTeste(testeId) {
 
     try {
         // Excluir teste (as respostas serão deletadas em cascata)
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('testes')
             .delete()
             .eq('id', testeId);

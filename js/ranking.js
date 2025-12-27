@@ -32,7 +32,7 @@ async function carregarRanking() {
         dataLimite.setDate(dataLimite.getDate() - 30);
 
         // Buscar estatísticas dos últimos 30 dias para cada usuário
-        const { data: usuarios, error: usuariosError } = await supabase
+        const { data: usuarios, error: usuariosError } = await supabaseClient
             .from('usuarios')
             .select('id, nome, instagram');
 
@@ -41,7 +41,7 @@ async function carregarRanking() {
         // Para cada usuário, buscar suas estatísticas dos últimos 30 dias
         const rankingPromises = usuarios.map(async (usuario) => {
             // Buscar respostas dos últimos 30 dias
-            const { data: respostas, error: respostasError } = await supabase
+            const { data: respostas, error: respostasError } = await supabaseClient
                 .from('respostas_usuarios')
                 .select('status_resposta')
                 .eq('usuario_id', usuario.id)
@@ -293,7 +293,7 @@ async function salvarInstagram() {
 
     try {
         // Atualizar no banco
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('usuarios')
             .update({ instagram: instagram })
             .eq('id', currentUserId);

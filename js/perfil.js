@@ -34,7 +34,7 @@ async function carregarPerfil() {
         document.getElementById('errorMessage').classList.add('hide');
 
         // Buscar dados do usuário
-        const { data: usuario, error: usuarioError } = await supabase
+        const { data: usuario, error: usuarioError } = await supabaseClient
             .from('usuarios')
             .select('*')
             .eq('id', userId)
@@ -116,7 +116,7 @@ async function carregarEstatisticas() {
         }
 
         // Query base
-        let query = supabase
+        let query = supabaseClient
             .from('respostas_usuarios')
             .select('status_resposta')
             .eq('usuario_id', userId);
@@ -143,7 +143,7 @@ async function carregarEstatisticas() {
         document.getElementById('porcentagemAcertos').textContent = porcentagemAcertos + '%';
 
         // Estatísticas gerais (sempre todo o período)
-        const { data: todasRespostas } = await supabase
+        const { data: todasRespostas } = await supabaseClient
             .from('respostas_usuarios')
             .select('status_resposta')
             .eq('usuario_id', userId);
@@ -166,7 +166,7 @@ async function carregarEstatisticas() {
 async function carregarPosicaoRanking() {
     try {
         // Buscar todos os usuários
-        const { data: usuarios, error: usuariosError } = await supabase
+        const { data: usuarios, error: usuariosError } = await supabaseClient
             .from('usuarios')
             .select('id');
 
@@ -177,7 +177,7 @@ async function carregarPosicaoRanking() {
         dataLimite.setDate(dataLimite.getDate() - 30);
 
         const rankingPromises = usuarios.map(async (usuario) => {
-            const { data: respostas } = await supabase
+            const { data: respostas } = await supabaseClient
                 .from('respostas_usuarios')
                 .select('status_resposta')
                 .eq('usuario_id', usuario.id)
@@ -271,7 +271,7 @@ async function carregarEstatisticasPorAssunto() {
         }
 
         // Buscar todas as respostas do usuário com dados das questões
-        let query = supabase
+        let query = supabaseClient
             .from('respostas_usuarios')
             .select(`
                 status_resposta,
@@ -348,7 +348,7 @@ async function carregarEstatisticasPorAssunto() {
 async function carregarAtividadeRecente() {
     try {
         // Buscar últimos 5 testes
-        const { data: testes, error } = await supabase
+        const { data: testes, error } = await supabaseClient
             .from('testes')
             .select('*')
             .eq('usuario_id', userId)
@@ -367,7 +367,7 @@ async function carregarAtividadeRecente() {
 
         // Para cada teste, buscar estatísticas
         const atividadesPromises = testes.map(async (teste) => {
-            const { data: respostas } = await supabase
+            const { data: respostas } = await supabaseClient
                 .from('respostas_usuarios')
                 .select('status_resposta')
                 .eq('teste_id', teste.id);
