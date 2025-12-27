@@ -315,11 +315,12 @@
                     <div class="plan-card free" id="plan-free">
                         <div class="plan-name">Free</div>
                         <div class="plan-price">R$ 0<small>/mês</small></div>
-                        <div class="plan-period">Grátis para sempre</div>
+                        <div class="plan-period">Sempre grátis</div>
                         <ul class="plan-features">
-                            <li>15 questões por dia</li>
-                            <li>Estatísticas básicas</li>
-                            <li>Ranking público</li>
+                            <li>10 questões por dia</li>
+                            <li>Questões comentadas</li>
+                            <li>Modo aprendizado</li>
+                            <li>Modo simulado</li>
                         </ul>
                         <button class="btn-plan" id="btn-free" disabled>Plano Atual</button>
                     </div>
@@ -328,13 +329,17 @@
                     <div class="plan-card featured" id="plan-anual">
                         <span class="plan-badge popular">MAIS POPULAR</span>
                         <div class="plan-name">Anual</div>
-                        <div class="plan-price">R$ 29<small>/mês</small></div>
-                        <div class="plan-period">R$ 348/ano (40% OFF)</div>
+                        <div class="plan-price">R$ 500<small>/ano</small></div>
+                        <div class="plan-period">Economize R$ 220 (31% off)</div>
                         <ul class="plan-features">
                             <li>Questões ilimitadas</li>
-                            <li>Todas as provas disponíveis</li>
-                            <li>Estatísticas avançadas</li>
-                            <li>Filtros por assunto</li>
+                            <li>Todas as especialidades</li>
+                            <li>Filtros avançados</li>
+                            <li>Estatísticas detalhadas</li>
+                            <li>Download de relatórios</li>
+                            <li>Questões comentadas</li>
+                            <li>Modo aprendizado</li>
+                            <li>Modo simulado</li>
                             <li>Histórico completo</li>
                             <li>Suporte prioritário</li>
                         </ul>
@@ -346,13 +351,17 @@
                     <!-- Plano SEMESTRAL -->
                     <div class="plan-card" id="plan-semestral">
                         <div class="plan-name">Semestral</div>
-                        <div class="plan-price">R$ 39<small>/mês</small></div>
-                        <div class="plan-period">R$ 234/semestre (20% OFF)</div>
+                        <div class="plan-price">R$ 300<small>/6 meses</small></div>
+                        <div class="plan-period">Economize R$ 60 (14% off)</div>
                         <ul class="plan-features">
                             <li>Questões ilimitadas</li>
-                            <li>Todas as provas disponíveis</li>
-                            <li>Estatísticas avançadas</li>
-                            <li>Filtros por assunto</li>
+                            <li>Todas as especialidades</li>
+                            <li>Filtros avançados</li>
+                            <li>Estatísticas detalhadas</li>
+                            <li>Download de relatórios</li>
+                            <li>Questões comentadas</li>
+                            <li>Modo aprendizado</li>
+                            <li>Modo simulado</li>
                             <li>Histórico completo</li>
                             <li>Suporte prioritário</li>
                         </ul>
@@ -364,13 +373,17 @@
                     <!-- Plano MENSAL -->
                     <div class="plan-card" id="plan-mensal">
                         <div class="plan-name">Mensal</div>
-                        <div class="plan-price">R$ 49<small>/mês</small></div>
-                        <div class="plan-period">Renovação mensal</div>
+                        <div class="plan-price">R$ 60<small>/mês</small></div>
+                        <div class="plan-period">Pago mensalmente</div>
                         <ul class="plan-features">
                             <li>Questões ilimitadas</li>
-                            <li>Todas as provas disponíveis</li>
-                            <li>Estatísticas avançadas</li>
-                            <li>Filtros por assunto</li>
+                            <li>Todas as especialidades</li>
+                            <li>Filtros avançados</li>
+                            <li>Estatísticas detalhadas</li>
+                            <li>Download de relatórios</li>
+                            <li>Questões comentadas</li>
+                            <li>Modo aprendizado</li>
+                            <li>Modo simulado</li>
                             <li>Histórico completo</li>
                             <li>Suporte prioritário</li>
                         </ul>
@@ -438,7 +451,7 @@
 
             if (plano === 'free') {
                 // Calcular questões restantes
-                const limite = 15;
+                const limite = 10;
                 const respondidas = userData.questoes_respondidas_hoje || 0;
                 const restantes = Math.max(0, limite - respondidas);
 
