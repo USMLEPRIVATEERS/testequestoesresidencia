@@ -60,14 +60,20 @@ async function handleRegister(event) {
 
     const name = document.getElementById('registerName').value;
     const email = document.getElementById('registerEmail').value;
-    const whatsapp = document.getElementById('registerWhatsapp').value;
     const password = document.getElementById('registerPassword').value;
     const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
 
+    // Construir WhatsApp completo a partir dos 3 campos
+    const countryCode = document.getElementById('whatsappCountryCode').value;
+    const ddd = document.getElementById('whatsappDDD').value;
+    const number = document.getElementById('whatsappNumber').value;
+
+    // Montar o WhatsApp completo
+    const whatsapp = ddd ? `${countryCode}${ddd}${number}` : `${countryCode}${number}`;
+
     // Validar WhatsApp
-    const whatsappRegex = /^\+[0-9]{12,15}$/;
-    if (!whatsappRegex.test(whatsapp)) {
-        Utils.showNotification('WhatsApp inválido! Use o formato: +5511999999999', 'error');
+    if (!whatsapp || whatsapp.length < 10) {
+        Utils.showNotification('Preencha o WhatsApp corretamente!', 'error');
         return;
     }
 

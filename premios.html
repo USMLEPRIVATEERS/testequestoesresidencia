@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ganhe 1 Mês Grátis - Questões Residência</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .premio-hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, var(--black) 0%, var(--gray-900) 100%);
+            color: var(--white);
+            border-radius: var(--radius-xl);
+            margin-bottom: 50px;
+        }
+
+        .premio-hero h1 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .premio-hero .destaque {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .premio-hero p {
+            font-size: 18px;
+            opacity: 0.95;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        .instrucoes {
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: 35px;
+            margin-bottom: 40px;
+        }
+
+        .instrucoes h2 {
+            margin-bottom: 25px;
+            font-size: 26px;
+        }
+
+        .passo {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            border: 2px solid var(--gray-200);
+        }
+
+        .passo-numero {
+            background: var(--black);
+            color: var(--white);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .passo-conteudo h3 {
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .passo-conteudo p {
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+
+        .provas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .prova-card {
+            background: var(--white);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prova-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--black);
+        }
+
+        .prova-card.recebida {
+            opacity: 0.6;
+            background: var(--gray-100);
+        }
+
+        .prova-card.recebida::after {
+            content: '✓ Já recebemos';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--gray-700);
+            color: var(--white);
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .prova-info {
+            margin-bottom: 20px;
+        }
+
+        .prova-info h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: var(--black);
+        }
+
+        .prova-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: var(--gray-700);
+        }
+
+        .prova-detail strong {
+            color: var(--black);
+        }
+
+        .prova-obs {
+            background: var(--gray-50);
+            border-radius: var(--radius);
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--gray-700);
+            line-height: 1.5;
+        }
+
+        .minhas-contribuicoes {
+            margin-top: 50px;
+        }
+
+        .contrib-item {
+            background: var(--white);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .contrib-item.pendente {
+            border-color: var(--warning-color);
+            background: #fffef0;
+        }
+
+        .contrib-item.aprovada {
+            border-color: var(--black);
+            background: var(--gray-50);
+        }
+
+        .contrib-item.recusada {
+            border-color: var(--gray-500);
+            background: var(--gray-100);
+            opacity: 0.7;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-badge.pendente {
+            background: var(--warning-color);
+            color: var(--white);
+        }
+
+        .status-badge.aprovada {
+            background: var(--black);
+            color: var(--white);
+        }
+
+        .status-badge.recusada {
+            background: var(--gray-600);
+            color: var(--white);
+        }
+
+        @media (max-width: 768px) {
+            .premio-hero h1 {
+                font-size: 32px;
+            }
+
+            .provas-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">📚 Questões Residência</div>
+            <nav class="nav">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="criar-teste.html" class="nav-link">Novo Teste</a>
+                <a href="ranking.html" class="nav-link">Ranking</a>
+                <a href="planos.html" class="nav-link">Planos</a>
+                <a href="premios.html" class="nav-link active">Prêmios</a>
+                <a href="#" onclick="Utils.logout()" class="nav-link">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Hero -->
+        <div class="premio-hero">
+            <div class="destaque">🎁 Ganhe 1 Mês Grátis!</div>
+            <h1>Ajude-nos com Provas de Residência</h1>
+            <p>
+                Estamos construindo o maior banco de questões de residência médica do Brasil!
+                Contribua com PDFs de provas que ainda não temos e ganhe <strong>1 mês de acesso ilimitado GRÁTIS</strong> para cada prova aprovada.
+                Sem limite de contribuições!
+            </p>
+        </div>
+
+        <!-- Instruções -->
+        <div class="instrucoes">
+            <h2>📋 Como Funciona?</h2>
+
+            <div class="passo">
+                <div class="passo-numero">1</div>
+                <div class="passo-conteudo">
+                    <h3>Escolha uma Prova</h3>
+                    <p>Selecione uma prova da lista abaixo que você tenha ou consiga obter.</p>
+                </div>
+            </div>
+
+            <div class="passo">
+                <div class="passo-numero">2</div>
+                <div class="passo-conteudo">
+                    <h3>Faça Upload no Google Drive</h3>
+                    <p>Coloque o <strong>PDF da prova + gabarito oficial</strong> em uma pasta do seu Google Drive.</p>
+                </div>
+            </div>
+
+            <div class="passo">
+                <div class="passo-numero">3</div>
+                <div class="passo-conteudo">
+                    <h3>Compartilhe a Pasta</h3>
+                    <p>Compartilhe a pasta com <strong>"Qualquer pessoa com o link"</strong> e copie o link.</p>
+                </div>
+            </div>
+
+            <div class="passo">
+                <div class="passo-numero">4</div>
+                <div class="passo-conteudo">
+                    <h3>Envie o Link</h3>
+                    <p>Clique em "Contribuir" na prova, cole o link e envie. Nossa equipe validará em até 48h.</p>
+                </div>
+            </div>
+
+            <div class="passo">
+                <div class="passo-numero">5</div>
+                <div class="passo-conteudo">
+                    <h3>Ganhe 1 Mês Grátis!</h3>
+                    <p>Se aprovada, você ganha automaticamente <strong>1 mês de plano mensal grátis</strong>! Pode contribuir quantas vezes quiser.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Provas Necessárias -->
+        <div>
+            <h2 style="margin-bottom: 30px;">🔍 Provas que Estamos Procurando</h2>
+            <div id="provasGrid" class="provas-grid">
+                <!-- Carregado via JavaScript -->
+            </div>
+        </div>
+
+        <!-- Minhas Contribuições -->
+        <div class="minhas-contribuicoes">
+            <h2 style="margin-bottom: 25px;">📤 Minhas Contribuições</h2>
+            <div id="minhasContribuicoes">
+                <!-- Carregado via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Contribuição -->
+    <div id="modalContribuicao" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 25px;">Contribuir com Prova</h2>
+            <form id="formContribuicao" onsubmit="enviarContribuicao(event)">
+                <div id="provaInfoModal" style="background: var(--gray-50); padding: 20px; border-radius: var(--radius); margin-bottom: 25px;">
+                    <!-- Info da prova selecionada -->
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Link do Google Drive</label>
+                    <input
+                        type="url"
+                        id="linkDrive"
+                        class="form-input"
+                        placeholder="https://drive.google.com/drive/folders/..."
+                        required
+                    >
+                    <small style="color: var(--text-muted); margin-top: 8px; display: block;">
+                        ⚠️ Certifique-se de que a pasta está compartilhada como "Qualquer pessoa com o link" e contém o PDF da prova + gabarito oficial.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Observações (Opcional)</label>
+                    <textarea
+                        id="observacoesContrib"
+                        class="form-textarea"
+                        placeholder="Alguma informação adicional..."
+                        rows="3"
+                    ></textarea>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Enviar Contribuição</button>
+                    <button type="button" class="btn" onclick="fecharModalContribuicao()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/premios.js"></script>
+</body>
+</html>

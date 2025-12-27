@@ -69,19 +69,92 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="registerWhatsapp">WhatsApp</label>
-                        <input
-                            type="tel"
-                            id="registerWhatsapp"
-                            class="form-input"
-                            required
-                            placeholder="+5511999999999"
-                            pattern="\+[0-9]{12,15}"
-                            title="Formato: +55 (código do país) + DDD + número. Exemplo: +5511999999999"
-                        >
-                        <small style="color: var(--secondary-color); font-size: 12px;">
-                            Formato: +55 (código) + DDD + número. Ex: +5511999999999
+                        <div style="display: flex; gap: 10px;">
+                            <select id="whatsappCountryCode" class="form-select" style="flex: 0 0 120px;" onchange="updateWhatsappFields()">
+                                <option value="+55" data-ddd-length="2" data-phone-length="9">🇧🇷 +55</option>
+                                <option value="+1" data-ddd-length="3" data-phone-length="7">🇺🇸 +1</option>
+                                <option value="+44" data-ddd-length="2" data-phone-length="10">🇬🇧 +44</option>
+                                <option value="+351" data-ddd-length="0" data-phone-length="9">🇵🇹 +351</option>
+                                <option value="+34" data-ddd-length="0" data-phone-length="9">🇪🇸 +34</option>
+                                <option value="+49" data-ddd-length="0" data-phone-length="11">🇩🇪 +49</option>
+                                <option value="+33" data-ddd-length="1" data-phone-length="9">🇫🇷 +33</option>
+                                <option value="+39" data-ddd-length="0" data-phone-length="10">🇮🇹 +39</option>
+                                <option value="+54" data-ddd-length="2" data-phone-length="8">🇦🇷 +54</option>
+                                <option value="+56" data-ddd-length="1" data-phone-length="8">🇨🇱 +56</option>
+                                <option value="+52" data-ddd-length="2" data-phone-length="8">🇲🇽 +52</option>
+                            </select>
+                            <input
+                                type="tel"
+                                id="whatsappDDD"
+                                class="form-input"
+                                placeholder="DDD"
+                                maxlength="2"
+                                style="flex: 0 0 80px;"
+                                required
+                                pattern="[0-9]{2}"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            >
+                            <input
+                                type="tel"
+                                id="whatsappNumber"
+                                class="form-input"
+                                placeholder="Número"
+                                maxlength="9"
+                                style="flex: 1;"
+                                required
+                                pattern="[0-9]{8,9}"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            >
+                        </div>
+                        <small style="color: var(--text-muted); font-size: 12px; margin-top: 5px; display: block;">
+                            <span id="whatsappExample">Exemplo: DDD: 11, Número: 999999999</span>
                         </small>
                     </div>
+                    <script>
+                        function updateWhatsappFields() {
+                            const select = document.getElementById('whatsappCountryCode');
+                            const option = select.options[select.selectedIndex];
+                            const dddLength = option.getAttribute('data-ddd-length');
+                            const phoneLength = option.getAttribute('data-phone-length');
+
+                            const dddInput = document.getElementById('whatsappDDD');
+                            const phoneInput = document.getElementById('whatsappNumber');
+                            const example = document.getElementById('whatsappExample');
+
+                            if (dddLength === '0') {
+                                // Países sem DDD (ex: Portugal)
+                                dddInput.style.display = 'none';
+                                dddInput.required = false;
+                                dddInput.value = '';
+                                phoneInput.maxLength = phoneLength;
+                                phoneInput.pattern = `[0-9]{${phoneLength}}`;
+                                phoneInput.placeholder = 'Número completo';
+                                example.textContent = `Exemplo: Número com ${phoneLength} dígitos`;
+                            } else {
+                                // Países com DDD
+                                dddInput.style.display = 'block';
+                                dddInput.required = true;
+                                dddInput.maxLength = dddLength;
+                                dddInput.pattern = `[0-9]{${dddLength}}`;
+                                phoneInput.maxLength = phoneLength;
+                                phoneInput.pattern = `[0-9]{${phoneLength}}`;
+                                phoneInput.placeholder = 'Número';
+
+                                if (select.value === '+55') {
+                                    example.textContent = 'Exemplo: DDD: 11, Número: 999999999';
+                                } else if (select.value === '+1') {
+                                    example.textContent = 'Exemplo: DDD: 212, Número: 5551234';
+                                } else {
+                                    example.textContent = `Exemplo: DDD com ${dddLength} dígitos, Número com ${phoneLength} dígitos`;
+                                }
+                            }
+                        }
+
+                        // Inicializar campos ao carregar
+                        if (document.getElementById('whatsappCountryCode')) {
+                            updateWhatsappFields();
+                        }
+                    </script>
                     <div class="form-group">
                         <label class="form-label" for="registerPassword">Senha</label>
                         <input
