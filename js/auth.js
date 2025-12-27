@@ -239,54 +239,33 @@ async function salvarPerfilInicial(event) {
             throw new Error('Usuário não autenticado');
         }
 
-        const dadosUsuario = {
-            id: user.id,
-            email: user.email,
+        // Preparar dados para atualização (IGUAL ao dashboard - só os campos necessários)
+        const dadosAtualizacao = {
             nome: nome,
             whatsapp: whatsapp,
             instagram: instagram || null,
+            email: user.email,
             plano: 'free',
             provas_selecionadas: [],
             questoes_respondidas_hoje: 0
         };
 
-        console.log('🔵 [COMPLETAR PERFIL] Salvando na tabela usuarios:', dadosUsuario);
+        console.log('🔵 [COMPLETAR PERFIL] Dados a serem salvos:', dadosAtualizacao);
 
-        // Tentar INSERT primeiro
-        let { data: insertData, error: dbError } = await supabaseClient
+        // Atualizar na tabela usuarios (IGUAL ao dashboard - só UPDATE, sem INSERT)
+        // Isso funciona porque o trigger já criou o registro quando criou no Auth
+        const { data, error: dbError } = await supabaseClient
             .from('usuarios')
-            .insert([dadosUsuario])
+            .update(dadosAtualizacao)
+            .eq('id', user.id)
             .select();
 
-        // Se der erro de duplicate key (23505), tentar UPDATE
-        if (dbError && dbError.code === '23505') {
-            console.warn('⚠️ [COMPLETAR PERFIL] Registro já existe, tentando UPDATE...');
-
-            const { data: updateData, error: updateError } = await supabaseClient
-                .from('usuarios')
-                .update({
-                    nome: dadosUsuario.nome,
-                    whatsapp: dadosUsuario.whatsapp,
-                    instagram: dadosUsuario.instagram
-                })
-                .eq('id', user.id)
-                .select();
-
-            if (updateError) {
-                console.error('❌ [COMPLETAR PERFIL] Erro ao atualizar:', updateError);
-                throw new Error('Erro ao atualizar perfil: ' + updateError.message);
-            }
-
-            insertData = updateData;
-            dbError = null;
-        }
-
         if (dbError) {
-            console.error('❌ [COMPLETAR PERFIL] Erro ao salvar:', dbError);
+            console.error('❌ [COMPLETAR PERFIL] Erro ao atualizar:', dbError);
             throw new Error('Erro ao salvar perfil: ' + dbError.message);
         }
 
-        console.log('✅ [COMPLETAR PERFIL] Perfil salvo com sucesso:', insertData);
+        console.log('✅ [COMPLETAR PERFIL] Perfil salvo com sucesso:', data);
 
         Utils.showNotification('Perfil completado! Redirecionando...', 'success');
 
