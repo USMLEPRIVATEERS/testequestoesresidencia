@@ -58,10 +58,20 @@ async function carregarTeste() {
 
             if (questoesError) throw questoesError;
 
+            console.log('🟡 [DEBUG] Questões recebidas do banco:', questoes);
+            console.log('🟡 [DEBUG] IDs esperados:', teste.questoes_ids);
+
             // Ordenar questões na mesma ordem de questoes_ids
-            const questoesOrdenadas = teste.questoes_ids.map(id =>
-                questoes.find(q => q.id === id)
-            );
+            const questoesOrdenadas = teste.questoes_ids.map(id => {
+                const questaoEncontrada = questoes.find(q => q.id === id);
+                console.log(`🟡 [DEBUG] Procurando ID ${id}:`, questaoEncontrada ? 'ENCONTRADA' : 'NÃO ENCONTRADA');
+                if (questaoEncontrada) {
+                    console.log(`🟡 [DEBUG] Questão encontrada tem ID:`, questaoEncontrada.id);
+                }
+                return questaoEncontrada;
+            });
+
+            console.log('🟡 [DEBUG] Questões ordenadas:', questoesOrdenadas);
 
             testeData = {
                 testeId: teste.id,
@@ -155,6 +165,9 @@ function renderizarListaQuestoes() {
 // Renderizar questão atual
 function renderizarQuestao() {
     const questao = testeData.questoes[questaoAtualIndex];
+    console.log('🟠 [DEBUG] Renderizando questão:', questao);
+    console.log('🟠 [DEBUG] ID da questão:', questao?.id);
+
     respostaVisivel = false;
 
     // Atualizar cabeçalho
@@ -309,12 +322,18 @@ async function verResposta() {
     if (respostaVisivel) return;
 
     const questao = testeData.questoes[questaoAtualIndex];
+    console.log('🔴 [DEBUG] Ver Resposta - Questão atual:', questao);
+    console.log('🔴 [DEBUG] Ver Resposta - ID da questão:', questao?.id);
+    console.log('🔴 [DEBUG] Ver Resposta - questaoAtualIndex:', questaoAtualIndex);
+
     const respostaUsuarioAtual = respostasUsuario[questao.id]?.resposta;
 
     if (!respostaUsuarioAtual) {
         Utils.showNotification('Selecione uma alternativa primeiro', 'warning');
         return;
     }
+
+    console.log('🔴 [DEBUG] Vai salvar resposta com questao.id:', questao.id);
 
     // Salvar resposta no banco se ainda não foi salva
     if (!respostasUsuario[questao.id].status) {
