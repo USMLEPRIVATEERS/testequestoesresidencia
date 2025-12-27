@@ -270,19 +270,33 @@ async function abrirModalEditarPerfil() {
             const whatsapp = data.whatsapp;
             console.log('🔵 [EDIT] WhatsApp original:', whatsapp);
 
-            // Formato: +5511999999999
-            const countryCodeMatch = whatsapp.match(/^\+\d{1,3}/);
-            console.log('🔵 [EDIT] Country code match:', countryCodeMatch);
+            // Get all country codes from the select dropdown (source of truth)
+            const select = document.getElementById('editWhatsappCountryCode');
+            const allCountryCodes = Array.from(select.options).map(opt => opt.value);
 
-            if (countryCodeMatch) {
-                const countryCode = countryCodeMatch[0];
-                console.log('🔵 [EDIT] Country code extraído:', countryCode);
+            // Sort by length descending to match longest codes first (e.g., +123 before +12)
+            allCountryCodes.sort((a, b) => b.length - a.length);
 
+            console.log('🔵 [EDIT] Country codes disponíveis:', allCountryCodes.slice(0, 5), '...');
+
+            // Find matching country code
+            let countryCode = null;
+            let restNumber = whatsapp;
+
+            for (const code of allCountryCodes) {
+                if (whatsapp.startsWith(code)) {
+                    countryCode = code;
+                    restNumber = whatsapp.substring(code.length);
+                    break;
+                }
+            }
+
+            console.log('🔵 [EDIT] Country code extraído:', countryCode);
+            console.log('🔵 [EDIT] Resto do número:', restNumber, '(length:', restNumber.length + ')');
+
+            if (countryCode) {
                 document.getElementById('editWhatsappCountryCode').value = countryCode;
-                console.log('🔵 [EDIT] Country code setado:', document.getElementById('editWhatsappCountryCode').value);
-
-                const restNumber = whatsapp.substring(countryCode.length);
-                console.log('🔵 [EDIT] Resto do número:', restNumber, '(length:', restNumber.length + ')');
+                console.log('🔵 [EDIT] Country code setado no select:', document.getElementById('editWhatsappCountryCode').value);
 
                 // Se for Brasil (+55), separar DDD e número
                 if (countryCode === '+55' && restNumber.length >= 10) {
@@ -302,6 +316,8 @@ async function abrirModalEditarPerfil() {
                     document.getElementById('editWhatsappDDD').value = '';
                     document.getElementById('editWhatsappNumber').value = restNumber;
                 }
+            } else {
+                console.warn('⚠️ [EDIT] Nenhum country code correspondente encontrado!');
             }
         }
 
