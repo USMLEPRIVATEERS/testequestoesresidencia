@@ -7,6 +7,17 @@ window.addEventListener('DOMContentLoaded', async () => {
     const session = await Utils.checkAuth();
     if (session) {
         window.location.href = 'dashboard.html';
+        return;
+    }
+
+    // Se URL tem #registro, mostrar formulário de registro
+    if (window.location.hash === '#registro') {
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        if (loginForm && registerForm) {
+            loginForm.classList.add('hide');
+            registerForm.classList.remove('hide');
+        }
     }
 });
 

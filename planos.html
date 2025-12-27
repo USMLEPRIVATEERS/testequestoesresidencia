@@ -191,9 +191,20 @@
     <header class="header">
         <div class="header-content">
             <div class="logo">📚 Questões Residência</div>
-            <nav class="nav">
-                <a href="dashboard.html" class="nav-link">Dashboard</a>
+            <!-- Navegação quando NÃO logado -->
+            <nav class="nav" id="navPublic" style="display: none;">
                 <a href="planos.html" class="nav-link active">Planos</a>
+                <a href="index.html" class="btn" style="margin-left: 10px; padding: 8px 20px;">Login</a>
+                <a href="index.html#registro" class="btn btn-primary" style="padding: 8px 20px;">Cadastrar</a>
+            </nav>
+            <!-- Navegação quando logado -->
+            <nav class="nav" id="navLogado" style="display: none;">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="criar-teste.html" class="nav-link">Novo Teste</a>
+                <a href="testes-anteriores.html" class="nav-link">Testes Anteriores</a>
+                <a href="ranking.html" class="nav-link">Ranking</a>
+                <a href="planos.html" class="nav-link active">Planos</a>
+                <a href="premios.html" class="nav-link">Prêmios</a>
                 <a href="#" class="nav-link" onclick="logout()">Sair</a>
             </nav>
         </div>
@@ -319,12 +330,39 @@
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
     <script>
-        // Verificar autenticação
+        let usuarioLogado = false;
+
+        // Verificar autenticação SEM forçar login
         window.addEventListener('DOMContentLoaded', async () => {
-            await Utils.requireAuth();
-            await carregarInfoPlano();
+            await verificarAutenticacao();
             verificarNovoUsuario();
         });
+
+        // Verificar se usuário está autenticado (sem redirecionar)
+        async function verificarAutenticacao() {
+            try {
+                const session = await Utils.checkAuth();
+
+                if (session && session.user) {
+                    // Usuário está logado
+                    usuarioLogado = true;
+                    document.getElementById('navLogado').style.display = 'flex';
+                    document.getElementById('navPublic').style.display = 'none';
+                    await carregarInfoPlano();
+                } else {
+                    // Usuário NÃO está logado - modo público
+                    usuarioLogado = false;
+                    document.getElementById('navPublic').style.display = 'flex';
+                    document.getElementById('navLogado').style.display = 'none';
+                }
+            } catch (error) {
+                // Erro ao verificar - assumir modo público
+                console.log('Modo público - usuário não autenticado');
+                usuarioLogado = false;
+                document.getElementById('navPublic').style.display = 'flex';
+                document.getElementById('navLogado').style.display = 'none';
+            }
+        }
 
         // Verificar se é novo usuário
         function verificarNovoUsuario() {
@@ -345,6 +383,8 @@
         async function carregarInfoPlano() {
             try {
                 const session = await Utils.checkAuth();
+                if (!session) return;
+
                 const userId = session.user.id;
 
                 // Buscar plano do usuário
@@ -365,6 +405,15 @@
 
         // Selecionar plano
         async function selecionarPlano(plano) {
+            // Se não estiver logado, redirecionar para cadastro
+            if (!usuarioLogado) {
+                Utils.showNotification('Faça login ou cadastre-se para escolher um plano!', 'info');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+                return;
+            }
+
             if (plano === 'free') {
                 // Redirecionar para dashboard com plano FREE
                 Utils.showNotification('Plano FREE selecionado! Você tem 10 questões por dia.', 'success');
@@ -379,6 +428,15 @@
 
         // Mostrar mensagem de pagamento em breve
         function mostrarPagamentoEmBreve(plano) {
+            // Se não estiver logado, redirecionar para cadastro
+            if (!usuarioLogado) {
+                Utils.showNotification('Faça login ou cadastre-se para assinar um plano!', 'info');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+                return;
+            }
+
             Utils.showNotification(
                 `A integração de pagamento está sendo finalizada! Em breve você poderá assinar o plano ${plano}.`,
                 'info'
