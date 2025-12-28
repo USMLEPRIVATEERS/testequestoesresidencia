@@ -5,6 +5,7 @@
 let userId = null;
 let userData = null;
 let currentPeriod = 30; // Dias
+let currentViewerId = null; // ID de quem está visualizando o perfil
 
 // Carregar perfil ao iniciar
 window.addEventListener('DOMContentLoaded', async () => {
@@ -14,6 +15,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    currentViewerId = session.user.id;
+
     // Pegar ID do usuário da URL
     const urlParams = new URLSearchParams(window.location.search);
     userId = urlParams.get('id');
@@ -21,6 +24,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (!userId) {
         mostrarErro();
         return;
+    }
+
+    // Registrar visualização (se não for próprio perfil)
+    if (userId !== currentViewerId) {
+        await registrarVisualizacao();
     }
 
     await carregarPerfil();
@@ -33,10 +41,10 @@ async function carregarPerfil() {
         document.getElementById('profileContent').classList.add('hide');
         document.getElementById('errorMessage').classList.add('hide');
 
-        // Buscar dados do usuário
+        // Buscar dados do usuário (incluindo whatsapp_visivel)
         const { data: usuario, error: usuarioError } = await supabaseClient
             .from('usuarios')
-            .select('*')
+            .select('nome, email, whatsapp, whatsapp_visivel, instagram')
             .eq('id', userId)
             .single();
 
@@ -95,13 +103,14 @@ function renderizarHeader() {
         socialLinks.appendChild(instagramLink);
     }
 
-    if (userData.whatsapp) {
-        const whatsappLink = document.createElement('a');
-        whatsappLink.href = `https://wa.me/${userData.whatsapp.replace('+', '')}`;
-        whatsappLink.target = '_blank';
-        whatsappLink.className = 'social-link';
-        whatsappLink.innerHTML = '💬 WhatsApp';
-        socialLinks.appendChild(whatsappLink);
+    // NOVO: Mostrar WhatsApp APENAS se ambos marcaram como visível
+    if (userData.whatsapp && userData.whatsapp_visivel) {
+        verificarEMostrarWhatsApp(userData.whatsapp);
+    }
+
+    // NOVO: Adicionar botão de report (se não for próprio perfil)
+    if (userId !== currentViewerId) {
+        adicionarBotaoReport();
     }
 }
 
@@ -332,4 +341,114 @@ function mostrarErro() {
     document.getElementById('loadingProfile').classList.add('hide');
     document.getElementById('profileContent').classList.add('hide');
     document.getElementById('errorMessage').classList.remove('hide');
+}
+
+// ============================================
+// NOVAS FUNÇÕES: WhatsApp Visível e Reports
+// ============================================
+
+// Registrar visualização de perfil
+async function registrarVisualizacao() {
+    try {
+        const { error } = await supabaseClient
+            .rpc('registrar_visualizacao_perfil', {
+                p_usuario_id: userId,
+                p_visitante_id: currentViewerId
+            });
+
+        if (error) {
+            Logger.error('Erro ao registrar visualização:', error);
+        } else {
+            Logger.debug('✅ Visualização registrada');
+        }
+    } catch (error) {
+        Logger.error('Erro ao registrar visualização:', error);
+    }
+}
+
+// Verificar se visualizador também tem WhatsApp visível
+async function verificarEMostrarWhatsApp(whatsappTarget) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('usuarios')
+            .select('whatsapp_visivel')
+            .eq('id', currentViewerId)
+            .single();
+
+        if (error) throw error;
+
+        // Só mostra WhatsApp se AMBOS tiverem marcado como visível
+        if (data.whatsapp_visivel === true) {
+            const socialLinks = document.getElementById('socialLinks');
+            const whatsappLink = document.createElement('a');
+            whatsappLink.href = `https://wa.me/${whatsappTarget.replace('+', '')}`;
+            whatsappLink.target = '_blank';
+            whatsappLink.className = 'social-link';
+            whatsappLink.innerHTML = '💬 WhatsApp';
+            socialLinks.appendChild(whatsappLink);
+        }
+
+    } catch (error) {
+        Logger.error('Erro ao verificar WhatsApp visível:', error);
+    }
+}
+
+// Adicionar botão de report
+function adicionarBotaoReport() {
+    const profileHeader = document.querySelector('.profile-header') || document.querySelector('.card');
+    if (!profileHeader) return;
+
+    const reportBtn = document.createElement('button');
+    reportBtn.className = 'btn btn-small';
+    reportBtn.style.cssText = 'background: var(--error-color); color: white; margin-top: 10px;';
+    reportBtn.textContent = '⚠️ Reportar Usuário';
+    reportBtn.onclick = abrirModalReport;
+
+    profileHeader.appendChild(reportBtn);
+}
+
+// Abrir modal de report
+function abrirModalReport() {
+    const modal = document.getElementById('modalReport');
+    if (modal) {
+        modal.classList.add('show');
+        const motivoField = document.getElementById('reportMotivo');
+        if (motivoField) motivoField.value = '';
+    }
+}
+
+// Fechar modal de report
+function fecharModalReport() {
+    const modal = document.getElementById('modalReport');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+// Enviar report
+async function enviarReport() {
+    try {
+        const motivoField = document.getElementById('reportMotivo');
+        const motivo = motivoField ? motivoField.value.trim() : '';
+
+        const { data, error } = await supabaseClient
+            .rpc('reportar_usuario', {
+                p_usuario_reportado_id: userId,
+                p_quem_reportou_id: currentViewerId,
+                p_motivo: motivo || null
+            });
+
+        if (error) throw error;
+
+        if (data.success) {
+            Utils.showNotification('Usuário reportado com sucesso. Obrigado por manter a comunidade segura!', 'success');
+            fecharModalReport();
+        } else {
+            Utils.showNotification(data.error || 'Erro ao reportar usuário', 'error');
+        }
+
+    } catch (error) {
+        Logger.error('Erro ao reportar usuário:', error);
+        Utils.showNotification('Erro ao reportar usuário', 'error');
+    }
 }

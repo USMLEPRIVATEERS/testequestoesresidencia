@@ -315,6 +315,38 @@
         </div>
     </div>
 
+    <!-- Modal de Report -->
+    <div id="modalReport" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Reportar Usuário</h2>
+                <button class="modal-close" onclick="fecharModalReport()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: var(--secondary-color); margin-bottom: 20px;">
+                    Por favor, descreva o motivo do report. Isso nos ajuda a manter a comunidade segura.
+                </p>
+                <div class="form-group">
+                    <label class="form-label">Motivo (opcional)</label>
+                    <textarea
+                        id="reportMotivo"
+                        class="form-input"
+                        rows="4"
+                        placeholder="Ex: Conteúdo inapropriado, spam, etc."
+                        maxlength="500"
+                    ></textarea>
+                    <small style="color: var(--secondary-color);">Máximo 500 caracteres</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="fecharModalReport()">Cancelar</button>
+                <button class="btn btn-primary" onclick="enviarReport()" style="background: var(--error-color);">
+                    Enviar Report
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
