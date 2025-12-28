@@ -181,13 +181,21 @@
                             Ranking baseado no desempenho dos estudantes nos últimos 30 dias
                         </p>
                     </div>
-                    <div>
-                        <label class="form-label">Ordenar por:</label>
-                        <select id="sortBySelect" class="form-select" onchange="changeSortBy()" style="width: 200px;">
-                            <option value="questoes_desc">Mais Questões</option>
-                            <option value="acertos_desc">Maior % Acertos</option>
-                            <option value="nome_asc">Nome (A-Z)</option>
-                        </select>
+                    <div style="display: flex; flex-direction: column; gap: 15px; align-items: flex-end;">
+                        <div>
+                            <label class="form-label">Ordenar por:</label>
+                            <select id="sortBySelect" class="form-select" onchange="changeSortBy()" style="width: 200px;">
+                                <option value="questoes_desc">Mais Questões</option>
+                                <option value="acertos_desc">Maior % Acertos</option>
+                                <option value="nome_asc">Nome (A-Z)</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="whatsappVisivelCheckbox" onchange="toggleWhatsappVisivel()" style="cursor: pointer;">
+                            <label for="whatsappVisivelCheckbox" style="cursor: pointer; margin: 0; user-select: none;">
+                                📱 Deixar meu WhatsApp visível para outros usuários
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>

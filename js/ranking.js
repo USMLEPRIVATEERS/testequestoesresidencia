@@ -18,6 +18,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     currentUserId = session.user.id;
     await carregarRanking();
+    await carregarEstadoWhatsappVisivel();
 });
 
 // Carregar dados do ranking
@@ -304,3 +305,57 @@ window.addEventListener('click', (event) => {
         fecharModalInstagram();
     }
 });
+
+// ============================================
+// WHATSAPP VISÍVEL
+// ============================================
+
+// Carregar estado do checkbox de WhatsApp visível
+async function carregarEstadoWhatsappVisivel() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('usuarios')
+            .select('whatsapp_visivel')
+            .eq('id', currentUserId)
+            .single();
+
+        if (error) throw error;
+
+        const checkbox = document.getElementById('whatsappVisivelCheckbox');
+        if (checkbox && data) {
+            checkbox.checked = data.whatsapp_visivel || false;
+        }
+
+    } catch (error) {
+        Logger.error('Erro ao carregar estado do WhatsApp:', error);
+    }
+}
+
+// Toggle WhatsApp visível
+async function toggleWhatsappVisivel() {
+    try {
+        const checkbox = document.getElementById('whatsappVisivelCheckbox');
+        const novoEstado = checkbox.checked;
+
+        const { error } = await supabaseClient
+            .from('usuarios')
+            .update({ whatsapp_visivel: novoEstado })
+            .eq('id', currentUserId);
+
+        if (error) throw error;
+
+        if (novoEstado) {
+            Utils.showNotification('Seu WhatsApp agora está visível para outros usuários que também compartilharam', 'success');
+        } else {
+            Utils.showNotification('Seu WhatsApp agora está privado', 'info');
+        }
+
+    } catch (error) {
+        Logger.error('Erro ao atualizar WhatsApp visível:', error);
+        Utils.showNotification('Erro ao atualizar configuração', 'error');
+
+        // Reverter checkbox se deu erro
+        const checkbox = document.getElementById('whatsappVisivelCheckbox');
+        checkbox.checked = !checkbox.checked;
+    }
+}
