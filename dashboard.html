@@ -87,6 +87,18 @@
             </div>
         </div>
 
+        <!-- Visitantes do Perfil -->
+        <div class="card mt-30">
+            <div class="card-title">👁️ Quem Visitou Meu Perfil (24h)</div>
+            <div class="card-body">
+                <div id="visitantesContainer">
+                    <div class="loader">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Gráfico de Desempenho -->
         <div class="card mt-30">
             <div class="card-title">Desempenho ao Longo do Tempo</div>
@@ -310,6 +322,41 @@
             <div class="flex gap-10 mt-30">
                 <button class="btn btn-primary" onclick="salvarProvas()">Salvar</button>
                 <button class="btn" onclick="fecharModalProvas()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Report do Dashboard -->
+    <div id="modalReportDashboard" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Reportar Usuário</h2>
+                <button class="modal-close" onclick="fecharModalReportDashboard()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 15px;">
+                    Você está reportando: <strong id="reportNomeUsuario"></strong>
+                </p>
+                <p style="color: var(--secondary-color); margin-bottom: 20px; font-size: 14px;">
+                    Por favor, descreva o motivo do report. Isso nos ajuda a manter a comunidade segura.
+                </p>
+                <div class="form-group">
+                    <label class="form-label">Motivo (opcional)</label>
+                    <textarea
+                        id="reportMotivoDashboard"
+                        class="form-input"
+                        rows="4"
+                        placeholder="Ex: Comportamento inadequado, spam, etc."
+                        maxlength="500"
+                    ></textarea>
+                    <small style="color: var(--secondary-color);">Máximo 500 caracteres</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="fecharModalReportDashboard()">Cancelar</button>
+                <button class="btn btn-primary" onclick="enviarReportDashboard()" style="background: var(--error-color);">
+                    Enviar Report
+                </button>
             </div>
         </div>
     </div>

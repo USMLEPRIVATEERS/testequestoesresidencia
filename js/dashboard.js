@@ -18,6 +18,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         await carregarEstatisticas();
         await carregarProvasSelecionadas();
         await atualizarGrafico();
+        await carregarVisitantes();
     }
 });
 
@@ -513,3 +514,145 @@ window.addEventListener('click', (event) => {
         fecharModalEditarPerfil();
     }
 });
+
+// ============================================
+// VISITANTES DO PERFIL
+// ============================================
+
+// Carregar visitantes das últimas 24h
+async function carregarVisitantes() {
+    try {
+        const session = await Utils.checkAuth();
+        const userId = session.user.id;
+
+        const { data: visitantes, error } = await supabaseClient
+            .rpc('obter_visitantes_24h', {
+                p_usuario_id: userId
+            });
+
+        if (error) throw error;
+
+        const container = document.getElementById('visitantesContainer');
+        if (!container) return;
+
+        if (!visitantes || visitantes.length === 0) {
+            container.innerHTML = `
+                <p style="color: var(--secondary-color); text-align: center; padding: 20px;">
+                    Ninguém visitou seu perfil nas últimas 24 horas
+                </p>
+            `;
+            return;
+        }
+
+        container.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                ${visitantes.map(v => {
+                    const dataFormatada = new Date(v.data_visualizacao).toLocaleString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    return `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--white);">
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">
+                                    ${v.nome.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <a href="perfil.html?id=${v.visitante_id}" style="color: var(--primary-color); font-weight: 600; text-decoration: none;">
+                                        ${v.nome}
+                                    </a>
+                                    ${v.instagram ? `<div style="color: var(--secondary-color); font-size: 12px;">@${v.instagram}</div>` : ''}
+                                    <div style="color: var(--secondary-color); font-size: 12px; margin-top: 2px;">
+                                        ${dataFormatada}
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                class="btn btn-small"
+                                onclick="abrirModalReportVisitante('${v.visitante_id}', '${v.nome}')"
+                                style="background: var(--error-color); color: white; padding: 6px 12px; font-size: 12px;"
+                            >
+                                ⚠️ Reportar
+                            </button>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+
+    } catch (error) {
+        Logger.error('Erro ao carregar visitantes:', error);
+        const container = document.getElementById('visitantesContainer');
+        if (container) {
+            container.innerHTML = `
+                <p style="color: var(--error-color); text-align: center; padding: 20px;">
+                    Erro ao carregar visitantes
+                </p>
+            `;
+        }
+    }
+}
+
+// Abrir modal de report para visitante
+function abrirModalReportVisitante(visitanteId, visitanteNome) {
+    // Guardar dados temporariamente
+    window.tempReportData = {
+        id: visitanteId,
+        nome: visitanteNome
+    };
+
+    const modal = document.getElementById('modalReportDashboard');
+    if (modal) {
+        modal.classList.add('show');
+        const nomeElement = document.getElementById('reportNomeUsuario');
+        const motivoElement = document.getElementById('reportMotivoDashboard');
+        if (nomeElement) nomeElement.textContent = visitanteNome;
+        if (motivoElement) motivoElement.value = '';
+    }
+}
+
+// Fechar modal de report do dashboard
+function fecharModalReportDashboard() {
+    const modal = document.getElementById('modalReportDashboard');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+    window.tempReportData = null;
+}
+
+// Enviar report do dashboard
+async function enviarReportDashboard() {
+    try {
+        if (!window.tempReportData) {
+            Utils.showNotification('Erro ao processar report', 'error');
+            return;
+        }
+
+        const session = await Utils.checkAuth();
+        const motivoElement = document.getElementById('reportMotivoDashboard');
+        const motivo = motivoElement ? motivoElement.value.trim() : '';
+
+        const { data, error } = await supabaseClient
+            .rpc('reportar_usuario', {
+                p_usuario_reportado_id: window.tempReportData.id,
+                p_quem_reportou_id: session.user.id,
+                p_motivo: motivo || null
+            });
+
+        if (error) throw error;
+
+        if (data.success) {
+            Utils.showNotification('Usuário reportado com sucesso. Obrigado!', 'success');
+            fecharModalReportDashboard();
+        } else {
+            Utils.showNotification(data.error || 'Erro ao reportar usuário', 'error');
+        }
+
+    } catch (error) {
+        Logger.error('Erro ao reportar usuário:', error);
+        Utils.showNotification('Erro ao reportar usuário', 'error');
+    }
+}
