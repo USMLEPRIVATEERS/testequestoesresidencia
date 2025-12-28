@@ -2,8 +2,9 @@
 -- FIX RLS PARA RANKING - Permitir visualização pública de estatísticas
 -- ============================================
 
--- 1. Remover política antiga de leitura de usuários (muito restritiva)
+-- 1. Remover políticas antigas de leitura de usuários (podem existir duplicadas)
 DROP POLICY IF EXISTS "Usuarios podem ler seus proprios dados" ON usuarios;
+DROP POLICY IF EXISTS "Usuarios autenticados podem ler dados publicos de usuarios" ON usuarios;
 
 -- 2. Criar nova política: todos podem ler dados básicos de usuários (mas não email)
 -- Para o ranking, precisamos ver nome e instagram de todos
@@ -15,7 +16,10 @@ USING (true);
 -- Nota: O SELECT ainda retorna todos os campos, mas no código JS só devemos
 -- selecionar os campos públicos (nome, instagram, id). O email não é exposto no ranking.
 
--- 3. Criar função para obter estatísticas de ranking (bypass RLS de forma segura)
+-- 3. Remover função antiga se existir (para evitar conflitos de tipo)
+DROP FUNCTION IF EXISTS obter_ranking_ultimos_30_dias();
+
+-- 4. Criar função para obter estatísticas de ranking (bypass RLS de forma segura)
 CREATE OR REPLACE FUNCTION obter_ranking_ultimos_30_dias()
 RETURNS TABLE (
     usuario_id UUID,
@@ -55,7 +59,7 @@ BEGIN
 END;
 $$;
 
--- 4. Garantir que usuários autenticados podem executar a função
+-- 5. Garantir que usuários autenticados podem executar a função
 GRANT EXECUTE ON FUNCTION obter_ranking_ultimos_30_dias() TO authenticated;
 
 -- ============================================
