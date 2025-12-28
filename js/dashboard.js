@@ -521,21 +521,34 @@ window.addEventListener('click', (event) => {
 
 // Carregar visitantes das últimas 24h
 async function carregarVisitantes() {
+    const container = document.getElementById('visitantesContainer');
+
     try {
+        Logger.debug('🔍 [VISITANTES] Iniciando carregamento...');
         const session = await Utils.checkAuth();
         const userId = session.user.id;
+
+        Logger.debug('🔍 [VISITANTES] User ID:', userId);
 
         const { data: visitantes, error } = await supabaseClient
             .rpc('obter_visitantes_24h', {
                 p_usuario_id: userId
             });
 
-        if (error) throw error;
+        Logger.debug('🔍 [VISITANTES] Resposta:', { visitantes, error });
 
-        const container = document.getElementById('visitantesContainer');
-        if (!container) return;
+        if (error) {
+            Logger.error('❌ [VISITANTES] Erro na RPC:', error);
+            throw error;
+        }
+
+        if (!container) {
+            Logger.error('❌ [VISITANTES] Container não encontrado!');
+            return;
+        }
 
         if (!visitantes || visitantes.length === 0) {
+            Logger.debug('✅ [VISITANTES] Nenhum visitante encontrado');
             container.innerHTML = `
                 <p style="color: var(--secondary-color); text-align: center; padding: 20px;">
                     Ninguém visitou seu perfil nas últimas 24 horas
@@ -543,6 +556,8 @@ async function carregarVisitantes() {
             `;
             return;
         }
+
+        Logger.debug(`✅ [VISITANTES] ${visitantes.length} visitante(s) encontrado(s)`);
 
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -583,13 +598,16 @@ async function carregarVisitantes() {
             </div>
         `;
 
+        Logger.debug('✅ [VISITANTES] Carregamento concluído com sucesso');
+
     } catch (error) {
-        Logger.error('Erro ao carregar visitantes:', error);
-        const container = document.getElementById('visitantesContainer');
+        Logger.error('❌ [VISITANTES] Erro ao carregar visitantes:', error);
+        Logger.error('❌ [VISITANTES] Detalhes do erro:', error.message, error.details, error.hint);
+
         if (container) {
             container.innerHTML = `
                 <p style="color: var(--error-color); text-align: center; padding: 20px;">
-                    Erro ao carregar visitantes
+                    Erro ao carregar visitantes: ${error.message || 'Erro desconhecido'}
                 </p>
             `;
         }
