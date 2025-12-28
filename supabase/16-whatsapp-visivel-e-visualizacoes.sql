@@ -27,10 +27,10 @@ ON visualizacoes_perfil(usuario_id, data_visualizacao DESC);
 CREATE INDEX IF NOT EXISTS idx_visualizacoes_visitante
 ON visualizacoes_perfil(visitante_id, data_visualizacao DESC);
 
--- Índice para buscar visualizações das últimas 24h
+-- Índice para buscar visualizações (removido WHERE pois NOW() não é IMMUTABLE)
+-- A query vai filtrar por data, mas o índice ainda será usado eficientemente
 CREATE INDEX IF NOT EXISTS idx_visualizacoes_recentes
-ON visualizacoes_perfil(usuario_id, data_visualizacao DESC)
-WHERE data_visualizacao >= NOW() - INTERVAL '24 hours';
+ON visualizacoes_perfil(usuario_id, data_visualizacao DESC);
 
 -- 3. Criar tabela de usuários reportados
 CREATE TABLE IF NOT EXISTS usuarios_reportados (
