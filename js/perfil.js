@@ -108,54 +108,31 @@ function renderizarHeader() {
 // Carregar estatísticas
 async function carregarEstatisticas() {
     try {
-        // Calcular data limite baseada no período
-        let dataLimite = null;
-        if (currentPeriod > 0) {
-            dataLimite = new Date();
-            dataLimite.setDate(dataLimite.getDate() - currentPeriod);
-        }
+        // Usar função SQL para obter estatísticas do período
+        const { data: statsPeriodo, error: errorPeriodo } = await supabaseClient
+            .rpc('obter_estatisticas_perfil_periodo', {
+                p_usuario_id: userId,
+                p_dias: currentPeriod
+            });
 
-        // Query base
-        let query = supabaseClient
-            .from('respostas_usuarios')
-            .select('status_resposta')
-            .eq('usuario_id', userId);
+        if (errorPeriodo) throw errorPeriodo;
 
-        if (dataLimite) {
-            query = query.gte('data_resposta', dataLimite.toISOString());
-        }
-
-        const { data: respostas, error } = await query;
-
-        if (error) throw error;
-
-        const totalQuestoes = respostas.length;
-        const totalCorretas = respostas.filter(r => r.status_resposta === 'C').length;
-        const totalIncorretas = respostas.filter(r => r.status_resposta === 'I').length;
-        const porcentagemAcertos = totalQuestoes > 0
-            ? Math.round((totalCorretas / totalQuestoes) * 100)
-            : 0;
-
-        // Atualizar UI
-        document.getElementById('totalQuestoes').textContent = totalQuestoes;
-        document.getElementById('totalCorretas').textContent = totalCorretas;
-        document.getElementById('totalIncorretas').textContent = totalIncorretas;
-        document.getElementById('porcentagemAcertos').textContent = porcentagemAcertos + '%';
+        // Atualizar UI com estatísticas do período
+        document.getElementById('totalQuestoes').textContent = statsPeriodo.total_questoes;
+        document.getElementById('totalCorretas').textContent = statsPeriodo.total_corretas;
+        document.getElementById('totalIncorretas').textContent = statsPeriodo.total_incorretas;
+        document.getElementById('porcentagemAcertos').textContent = statsPeriodo.porcentagem_acertos + '%';
 
         // Estatísticas gerais (sempre todo o período)
-        const { data: todasRespostas } = await supabaseClient
-            .from('respostas_usuarios')
-            .select('status_resposta')
-            .eq('usuario_id', userId);
+        const { data: statsGeral, error: errorGeral } = await supabaseClient
+            .rpc('obter_estatisticas_perfil', {
+                p_usuario_id: userId
+            });
 
-        const totalGeralQuestoes = todasRespostas.length;
-        const totalGeralCorretas = todasRespostas.filter(r => r.status_resposta === 'C').length;
-        const porcentagemGeral = totalGeralQuestoes > 0
-            ? Math.round((totalGeralCorretas / totalGeralQuestoes) * 100)
-            : 0;
+        if (errorGeral) throw errorGeral;
 
-        document.getElementById('totalQuestoesGeral').textContent = totalGeralQuestoes;
-        document.getElementById('porcentagemGeral').textContent = porcentagemGeral + '%';
+        document.getElementById('totalQuestoesGeral').textContent = statsGeral.total_questoes;
+        document.getElementById('porcentagemGeral').textContent = statsGeral.porcentagem_acertos + '%';
 
     } catch (error) {
         console.error('Erro ao carregar estatísticas:', error);
@@ -165,35 +142,13 @@ async function carregarEstatisticas() {
 // Carregar posição no ranking
 async function carregarPosicaoRanking() {
     try {
-        // Buscar todos os usuários
-        const { data: usuarios, error: usuariosError } = await supabaseClient
-            .from('usuarios')
-            .select('id');
+        // Usar função SQL para obter posição no ranking
+        const { data: posicao, error } = await supabaseClient
+            .rpc('obter_posicao_ranking', {
+                p_usuario_id: userId
+            });
 
-        if (usuariosError) throw usuariosError;
-
-        // Calcular ranking (últimos 30 dias)
-        const dataLimite = new Date();
-        dataLimite.setDate(dataLimite.getDate() - 30);
-
-        const rankingPromises = usuarios.map(async (usuario) => {
-            const { data: respostas } = await supabaseClient
-                .from('respostas_usuarios')
-                .select('status_resposta')
-                .eq('usuario_id', usuario.id)
-                .gte('data_resposta', dataLimite.toISOString());
-
-            const total = respostas.length;
-            return { id: usuario.id, total };
-        });
-
-        const results = await Promise.all(rankingPromises);
-
-        // Ordenar por total de questões
-        results.sort((a, b) => b.total - a.total);
-
-        // Encontrar posição do usuário
-        const posicao = results.findIndex(r => r.id === userId) + 1;
+        if (error) throw error;
 
         if (posicao > 0) {
             document.getElementById('posicaoRanking').textContent = posicao + 'º';
@@ -263,60 +218,19 @@ function renderizarConquistas() {
 // Carregar estatísticas por assunto
 async function carregarEstatisticasPorAssunto() {
     try {
-        // Calcular data limite baseada no período
-        let dataLimite = null;
-        if (currentPeriod > 0) {
-            dataLimite = new Date();
-            dataLimite.setDate(dataLimite.getDate() - currentPeriod);
-        }
-
-        // Buscar todas as respostas do usuário com dados das questões
-        let query = supabaseClient
-            .from('respostas_usuarios')
-            .select(`
-                status_resposta,
-                questoes (assunto)
-            `)
-            .eq('usuario_id', userId);
-
-        if (dataLimite) {
-            query = query.gte('data_resposta', dataLimite.toISOString());
-        }
-
-        const { data: respostas, error } = await query;
+        // Usar função SQL para obter estatísticas por assunto
+        const { data: assuntos, error } = await supabaseClient
+            .rpc('obter_estatisticas_por_assunto', {
+                p_usuario_id: userId,
+                p_dias: currentPeriod
+            });
 
         if (error) throw error;
-
-        // Agrupar por assunto
-        const assuntosMap = new Map();
-
-        respostas.forEach(resposta => {
-            const assunto = resposta.questoes?.assunto || 'Sem assunto';
-            if (!assuntosMap.has(assunto)) {
-                assuntosMap.set(assunto, { total: 0, corretas: 0 });
-            }
-            const stats = assuntosMap.get(assunto);
-            stats.total++;
-            if (resposta.status_resposta === 'C') {
-                stats.corretas++;
-            }
-        });
-
-        // Converter para array e ordenar por total de questões
-        const assuntos = Array.from(assuntosMap.entries())
-            .map(([assunto, stats]) => ({
-                assunto,
-                total: stats.total,
-                corretas: stats.corretas,
-                porcentagem: Math.round((stats.corretas / stats.total) * 100)
-            }))
-            .sort((a, b) => b.total - a.total)
-            .slice(0, 10); // Top 10 assuntos
 
         // Renderizar
         const container = document.getElementById('assuntosStats');
 
-        if (assuntos.length === 0) {
+        if (!assuntos || assuntos.length === 0) {
             container.innerHTML = '<p style="color: var(--secondary-color);">Nenhuma questão respondida neste período.</p>';
             return;
         }
@@ -327,12 +241,12 @@ async function carregarEstatisticasPorAssunto() {
             assuntos.map(a => `
                 <tr>
                     <td>${a.assunto}</td>
-                    <td>${a.total} questões</td>
+                    <td>${a.total_questoes} questões</td>
                     <td>
-                        <span class="stats-badge ${a.porcentagem >= 80 ? 'excellent' : a.porcentagem >= 60 ? 'good' : a.porcentagem >= 40 ? 'average' : 'low'}">
-                            ${a.porcentagem}%
+                        <span class="stats-badge ${a.porcentagem_acertos >= 80 ? 'excellent' : a.porcentagem_acertos >= 60 ? 'good' : a.porcentagem_acertos >= 40 ? 'average' : 'low'}">
+                            ${a.porcentagem_acertos}%
                         </span>
-                        <span style="color: var(--secondary-color); font-size: 12px;"> (${a.corretas}/${a.total})</span>
+                        <span style="color: var(--secondary-color); font-size: 12px;"> (${a.total_corretas}/${a.total_questoes})</span>
                     </td>
                 </tr>
             `).join('') +
@@ -347,67 +261,45 @@ async function carregarEstatisticasPorAssunto() {
 // Carregar atividade recente
 async function carregarAtividadeRecente() {
     try {
-        // Buscar últimos 5 testes
-        const { data: testes, error } = await supabaseClient
-            .from('testes')
-            .select('*')
-            .eq('usuario_id', userId)
-            .eq('status', 'finalizado')
-            .order('data_finalizacao', { ascending: false })
-            .limit(5);
+        // Usar função SQL para obter atividade recente
+        const { data: atividades, error } = await supabaseClient
+            .rpc('obter_atividade_recente', {
+                p_usuario_id: userId
+            });
 
         if (error) throw error;
 
         const container = document.getElementById('atividadeRecente');
 
-        if (testes.length === 0) {
+        if (!atividades || atividades.length === 0) {
             container.innerHTML = '<p style="color: var(--secondary-color);">Nenhum teste finalizado ainda.</p>';
             return;
         }
 
-        // Para cada teste, buscar estatísticas
-        const atividadesPromises = testes.map(async (teste) => {
-            const { data: respostas } = await supabaseClient
-                .from('respostas_usuarios')
-                .select('status_resposta')
-                .eq('teste_id', teste.id);
-
-            const total = respostas.length;
-            const corretas = respostas.filter(r => r.status_resposta === 'C').length;
-            const porcentagem = total > 0 ? Math.round((corretas / total) * 100) : 0;
-
-            return {
-                data: new Date(teste.data_finalizacao),
-                modo: teste.modo,
-                total,
-                corretas,
-                porcentagem
-            };
-        });
-
-        const atividades = await Promise.all(atividadesPromises);
-
         container.innerHTML = '<ul style="list-style: none; padding: 0;">' +
-            atividades.map(a => `
-                <li style="padding: 15px; border-bottom: 1px solid var(--border-color);">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong>${a.modo === 'aprendizado' ? '📚 Modo Aprendizado' : '📝 Modo Simulado'}</strong>
-                            <div style="color: var(--secondary-color); font-size: 14px; margin-top: 5px;">
-                                ${a.data.toLocaleDateString('pt-BR')} às ${a.data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                            </div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div><strong>${a.total}</strong> questões</div>
+            atividades.map(a => {
+                const data = new Date(a.data_finalizacao);
+                return `
+                    <li style="padding: 15px; border-bottom: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <span class="stats-badge ${a.porcentagem >= 80 ? 'excellent' : a.porcentagem >= 60 ? 'good' : a.porcentagem >= 40 ? 'average' : 'low'}">
-                                    ${a.porcentagem}% acertos
-                                </span>
+                                <strong>${a.modo === 'aprendizado' ? '📚 Modo Aprendizado' : '📝 Modo Simulado'}</strong>
+                                <div style="color: var(--secondary-color); font-size: 14px; margin-top: 5px;">
+                                    ${data.toLocaleDateString('pt-BR')} às ${data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div><strong>${a.total_questoes}</strong> questões</div>
+                                <div>
+                                    <span class="stats-badge ${a.porcentagem_acertos >= 80 ? 'excellent' : a.porcentagem_acertos >= 60 ? 'good' : a.porcentagem_acertos >= 40 ? 'average' : 'low'}">
+                                        ${a.porcentagem_acertos}% acertos
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </li>
-            `).join('') +
+                    </li>
+                `;
+            }).join('') +
             '</ul>';
 
     } catch (error) {
