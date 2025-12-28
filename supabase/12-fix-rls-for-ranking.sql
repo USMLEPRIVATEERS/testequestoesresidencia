@@ -19,8 +19,8 @@ USING (true);
 CREATE OR REPLACE FUNCTION obter_ranking_ultimos_30_dias()
 RETURNS TABLE (
     usuario_id UUID,
-    nome TEXT,
-    instagram TEXT,
+    nome VARCHAR(255),
+    instagram VARCHAR(100),
     total_questoes BIGINT,
     total_corretas BIGINT,
     porcentagem_acertos INTEGER
