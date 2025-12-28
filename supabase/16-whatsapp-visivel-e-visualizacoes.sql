@@ -8,8 +8,7 @@ ADD COLUMN IF NOT EXISTS whatsapp_visivel BOOLEAN DEFAULT FALSE;
 
 -- Criar índice para buscar usuários com whatsapp visível
 CREATE INDEX IF NOT EXISTS idx_usuarios_whatsapp_visivel
-ON usuarios(whatsapp_visivel)
-WHERE whatsapp_visivel = TRUE;
+ON usuarios(whatsapp_visivel);
 
 -- 2. Criar tabela de visualizações de perfil
 CREATE TABLE IF NOT EXISTS visualizacoes_perfil (
@@ -28,8 +27,10 @@ CREATE INDEX IF NOT EXISTS idx_visualizacoes_visitante
 ON visualizacoes_perfil(visitante_id, data_visualizacao DESC);
 
 -- Índice para buscar visualizações (removido WHERE pois NOW() não é IMMUTABLE)
+-- Primeiro remove o índice antigo caso exista com WHERE
+DROP INDEX IF EXISTS idx_visualizacoes_recentes;
 -- A query vai filtrar por data, mas o índice ainda será usado eficientemente
-CREATE INDEX IF NOT EXISTS idx_visualizacoes_recentes
+CREATE INDEX idx_visualizacoes_recentes
 ON visualizacoes_perfil(usuario_id, data_visualizacao DESC);
 
 -- 3. Criar tabela de usuários reportados
