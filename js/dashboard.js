@@ -18,14 +18,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         await carregarEstatisticas();
         await carregarProvasSelecionadas();
         await atualizarGrafico();
-
-        console.log('🔴 ANTES de chamar carregarVisitantes()');
-        try {
-            await carregarVisitantes();
-            console.log('🟢 DEPOIS de chamar carregarVisitantes()');
-        } catch (error) {
-            console.error('🔴 ERRO ao chamar carregarVisitantes():', error);
-        }
+        await carregarVisitantes();
     }
 });
 
@@ -528,32 +521,17 @@ window.addEventListener('click', (event) => {
 
 // Carregar visitantes das últimas 24h
 async function carregarVisitantes() {
-    console.log('🔵 [VISITANTES] FUNÇÃO FOI CHAMADA!');
     const container = document.getElementById('visitantesContainer');
-    console.log('🔵 [VISITANTES] Container:', container);
 
     try {
-        console.log('🔵 [VISITANTES] Entrando no try...');
         Logger.debug('🔍 [VISITANTES] Iniciando carregamento...');
-
-        console.log('🔵 [VISITANTES] Chamando Utils.checkAuth()...');
         const session = await Utils.checkAuth();
-        console.log('🔵 [VISITANTES] Session:', session);
-
         const userId = session.user.id;
-        console.log('🔵 [VISITANTES] User ID:', userId);
 
-        Logger.debug('🔍 [VISITANTES] User ID:', userId);
-
-        console.log('🔵 [VISITANTES] Chamando RPC obter_visitantes_24h...');
         const { data: visitantes, error } = await supabaseClient
             .rpc('obter_visitantes_24h', {
                 p_usuario_id: userId
             });
-
-        console.log('🔵 [VISITANTES] RPC retornou!');
-        console.log('🔵 [VISITANTES] Visitantes:', visitantes);
-        console.log('🔵 [VISITANTES] Error:', error);
 
         Logger.debug('🔍 [VISITANTES] Resposta:', { visitantes, error });
 
@@ -622,12 +600,11 @@ async function carregarVisitantes() {
 
     } catch (error) {
         Logger.error('❌ [VISITANTES] Erro ao carregar visitantes:', error);
-        Logger.error('❌ [VISITANTES] Detalhes do erro:', error.message, error.details, error.hint);
 
         if (container) {
             container.innerHTML = `
                 <p style="color: var(--error-color); text-align: center; padding: 20px;">
-                    Erro ao carregar visitantes: ${error.message || 'Erro desconhecido'}
+                    Erro ao carregar visitantes
                 </p>
             `;
         }
