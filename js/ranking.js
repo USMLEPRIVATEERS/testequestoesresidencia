@@ -30,6 +30,7 @@ async function carregarRanking() {
         // Calcular data de 30 dias atrás
         const dataLimite = new Date();
         dataLimite.setDate(dataLimite.getDate() - 30);
+        console.log('📅 Data limite (últimos 30 dias):', dataLimite.toISOString());
 
         // Buscar estatísticas dos últimos 30 dias para cada usuário
         const { data: usuarios, error: usuariosError } = await supabaseClient
@@ -38,25 +39,33 @@ async function carregarRanking() {
 
         if (usuariosError) throw usuariosError;
 
+        console.log(`👥 Total de usuários encontrados: ${usuarios.length}`);
+
         // Para cada usuário, buscar suas estatísticas dos últimos 30 dias
         const rankingPromises = usuarios.map(async (usuario) => {
             // Buscar respostas dos últimos 30 dias
             const { data: respostas, error: respostasError } = await supabaseClient
                 .from('respostas_usuarios')
-                .select('status_resposta')
+                .select('status_resposta, data_resposta')
                 .eq('usuario_id', usuario.id)
                 .gte('data_resposta', dataLimite.toISOString());
 
             if (respostasError) {
-                console.error('Erro ao buscar respostas:', respostasError);
+                console.error(`❌ Erro ao buscar respostas de ${usuario.nome}:`, respostasError);
                 return null;
             }
 
-            const totalQuestoes = respostas.length;
-            const totalCorretas = respostas.filter(r => r.status_resposta === 'C').length;
+            const totalQuestoes = respostas?.length || 0;
+            const totalCorretas = respostas?.filter(r => r.status_resposta === 'C').length || 0;
             const porcentagemAcertos = totalQuestoes > 0
                 ? Math.round((totalCorretas / totalQuestoes) * 100)
                 : 0;
+
+            // Debug: Log usuários com respostas
+            if (totalQuestoes > 0) {
+                console.log(`✅ ${usuario.nome}: ${totalQuestoes} questões, ${totalCorretas} corretas`);
+                console.log(`   Primeira resposta:`, respostas[0].data_resposta);
+            }
 
             return {
                 id: usuario.id,
