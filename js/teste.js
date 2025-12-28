@@ -415,9 +415,13 @@ async function salvarResposta(questaoId, resposta) {
 
         console.log('🔵 [DEBUG] Dados a serem inseridos:', dadosInsert);
 
+        // Usar UPSERT para evitar erro de duplicate key se clicar múltiplas vezes
         const { data, error } = await supabaseClient
             .from('respostas_usuarios')
-            .insert([dadosInsert])
+            .upsert([dadosInsert], {
+                onConflict: 'teste_id,questao_id', // Chave única: teste + questão
+                ignoreDuplicates: false // Atualizar se já existir
+            })
             .select();
 
         if (error) {

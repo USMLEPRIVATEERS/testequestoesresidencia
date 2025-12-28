@@ -29,6 +29,7 @@ async function carregarEstatisticas() {
 
         // Obter provas selecionadas do usuário
         const provasSelecionadas = currentUser.provas_selecionadas || [];
+        console.log('📊 [DASHBOARD] Provas selecionadas:', provasSelecionadas);
 
         // Total de questões disponíveis nas provas selecionadas
         let totalQuestoesQuery = supabaseClient
@@ -40,6 +41,7 @@ async function carregarEstatisticas() {
         }
 
         const { count: totalQuestoes } = await totalQuestoesQuery;
+        console.log('📊 [DASHBOARD] Total de questões nas provas selecionadas:', totalQuestoes);
 
         // Questões respondidas pelo usuário DAS PROVAS SELECIONADAS (não de todas as provas)
         let respostasQuery = supabaseClient
@@ -57,7 +59,12 @@ async function carregarEstatisticas() {
 
         const { data: respostas, error: respostasError } = await respostasQuery;
 
-        if (respostasError) throw respostasError;
+        if (respostasError) {
+            console.error('❌ [DASHBOARD] Erro ao buscar respostas:', respostasError);
+            throw respostasError;
+        }
+
+        console.log('📊 [DASHBOARD] Respostas das provas selecionadas:', respostas.length, respostas);
 
         const questoesRealizadas = respostas.length;
         const questoesCorretas = respostas.filter(r => r.status_resposta === 'C').length;
@@ -65,6 +72,11 @@ async function carregarEstatisticas() {
 
         // Calcular questões restantes (das provas selecionadas)
         const questoesRestantes = Math.max(0, (totalQuestoes || 0) - questoesRealizadas);
+
+        console.log('📊 [DASHBOARD] Cálculo final:');
+        console.log('  - Total questões:', totalQuestoes);
+        console.log('  - Questões realizadas:', questoesRealizadas);
+        console.log('  - Questões restantes:', questoesRestantes);
 
         const percentualConcluido = Utils.calcPercentage(questoesRealizadas, totalQuestoes);
         const percentualAcertos = Utils.calcPercentage(questoesCorretas, questoesRealizadas);
