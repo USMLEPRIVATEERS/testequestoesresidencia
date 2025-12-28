@@ -27,61 +27,29 @@ async function carregarRanking() {
         document.getElementById('rankingContent').classList.add('hide');
         document.getElementById('noDataMessage').classList.add('hide');
 
-        // Calcular data de 30 dias atrás
-        const dataLimite = new Date();
-        dataLimite.setDate(dataLimite.getDate() - 30);
-        console.log('📅 Data limite (últimos 30 dias):', dataLimite.toISOString());
+        console.log('📊 Carregando ranking dos últimos 30 dias...');
 
-        // Buscar estatísticas dos últimos 30 dias para cada usuário
-        const { data: usuarios, error: usuariosError } = await supabaseClient
-            .from('usuarios')
-            .select('id, nome, instagram');
+        // Usar função SQL que calcula estatísticas com bypass RLS de forma segura
+        const { data, error } = await supabaseClient
+            .rpc('obter_ranking_ultimos_30_dias');
 
-        if (usuariosError) throw usuariosError;
+        if (error) {
+            console.error('❌ Erro ao buscar ranking:', error);
+            throw error;
+        }
 
-        console.log(`👥 Total de usuários encontrados: ${usuarios.length}`);
+        console.log(`👥 Total de usuários no ranking: ${data.length}`);
+        console.log('📈 Primeiros 3 usuários:', data.slice(0, 3));
 
-        // Para cada usuário, buscar suas estatísticas dos últimos 30 dias
-        const rankingPromises = usuarios.map(async (usuario) => {
-            // Buscar respostas dos últimos 30 dias
-            const { data: respostas, error: respostasError } = await supabaseClient
-                .from('respostas_usuarios')
-                .select('status_resposta, data_resposta')
-                .eq('usuario_id', usuario.id)
-                .gte('data_resposta', dataLimite.toISOString());
-
-            if (respostasError) {
-                console.error(`❌ Erro ao buscar respostas de ${usuario.nome}:`, respostasError);
-                return null;
-            }
-
-            const totalQuestoes = respostas?.length || 0;
-            const totalCorretas = respostas?.filter(r => r.status_resposta === 'C').length || 0;
-            const porcentagemAcertos = totalQuestoes > 0
-                ? Math.round((totalCorretas / totalQuestoes) * 100)
-                : 0;
-
-            // Debug: Log usuários com respostas
-            if (totalQuestoes > 0) {
-                console.log(`✅ ${usuario.nome}: ${totalQuestoes} questões, ${totalCorretas} corretas`);
-                console.log(`   Primeira resposta:`, respostas[0].data_resposta);
-            }
-
-            return {
-                id: usuario.id,
-                nome: usuario.nome,
-                instagram: usuario.instagram,
-                total_questoes: totalQuestoes,
-                total_corretas: totalCorretas,
-                porcentagem_acertos: porcentagemAcertos
-            };
-        });
-
-        const results = await Promise.all(rankingPromises);
-        rankingData = results.filter(r => r !== null);
-
-        // Mostrar todos os usuários, mesmo que não tenham respondido questões
-        // (removido o filtro r.total_questoes > 0)
+        // Mapear dados para formato esperado
+        rankingData = data.map(row => ({
+            id: row.usuario_id,
+            nome: row.nome,
+            instagram: row.instagram,
+            total_questoes: parseInt(row.total_questoes) || 0,
+            total_corretas: parseInt(row.total_corretas) || 0,
+            porcentagem_acertos: parseInt(row.porcentagem_acertos) || 0
+        }));
 
         if (rankingData.length === 0) {
             document.getElementById('loadingRanking').classList.add('hide');
