@@ -41,11 +41,21 @@ async function carregarEstatisticas() {
 
         const { count: totalQuestoes } = await totalQuestoesQuery;
 
-        // Questões respondidas pelo usuário
-        const { data: respostas, error: respostasError } = await supabaseClient
+        // Questões respondidas pelo usuário DAS PROVAS SELECIONADAS (não de todas as provas)
+        let respostasQuery = supabaseClient
             .from('respostas_usuarios')
-            .select('status_resposta')
+            .select(`
+                status_resposta,
+                questoes!inner (processo_seletivo)
+            `)
             .eq('usuario_id', userId);
+
+        // Filtrar apenas respostas das provas selecionadas
+        if (provasSelecionadas.length > 0) {
+            respostasQuery = respostasQuery.in('questoes.processo_seletivo', provasSelecionadas);
+        }
+
+        const { data: respostas, error: respostasError } = await respostasQuery;
 
         if (respostasError) throw respostasError;
 
@@ -53,11 +63,14 @@ async function carregarEstatisticas() {
         const questoesCorretas = respostas.filter(r => r.status_resposta === 'C').length;
         const questoesIncorretas = respostas.filter(r => r.status_resposta === 'I').length;
 
+        // Calcular questões restantes (das provas selecionadas)
+        const questoesRestantes = Math.max(0, (totalQuestoes || 0) - questoesRealizadas);
+
         const percentualConcluido = Utils.calcPercentage(questoesRealizadas, totalQuestoes);
         const percentualAcertos = Utils.calcPercentage(questoesCorretas, questoesRealizadas);
 
         // Atualizar interface
-        document.getElementById('totalQuestoes').textContent = totalQuestoes || 0;
+        document.getElementById('totalQuestoes').textContent = questoesRestantes;
         document.getElementById('questoesRealizadas').textContent = questoesRealizadas;
         document.getElementById('percentualConcluido').textContent = percentualConcluido + '%';
         document.getElementById('totalCorretas').textContent = questoesCorretas;
